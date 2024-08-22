@@ -1,6 +1,7 @@
 from os.path import join
 
 import pytest
+
 from hdx.api.configuration import Configuration
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
@@ -27,12 +28,7 @@ class Testdtm:
     def input_dir(self, fixtures_dir):
         return join(fixtures_dir, "input")
 
-    def test_cesa(
-        self,
-        configuration,
-        fixtures_dir,
-        input_dir
-    ):
+    def test_cesa(self, configuration, fixtures_dir, input_dir):
         with temp_dir(
             "Testdtm",
             delete_on_success=True,

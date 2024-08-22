@@ -1,1 +1,2 @@
 # Collector specific configuration
+API_URL: "https://dtmapi.iom.int/api/IdpAdmin{admin_level}Data/GetAdmin{admin_level}Datav2?Admin0Pcode={iso3}"

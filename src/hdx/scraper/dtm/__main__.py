@@ -16,6 +16,8 @@ from hdx.utilities.path import (
 )
 from hdx.utilities.retriever import Retrieve
 
+from .dtm import Dtm
+
 logger = logging.getLogger(__name__)
 
 _USER_AGENT_LOOKUP = "hdx-scraper-dtm"
@@ -24,8 +26,8 @@ _UPDATED_BY_SCRIPT = "HDX Scraper: dtm"
 
 
 def main(
-    save: bool = True,
-    use_saved: bool = False,
+    save: bool = False,
+    use_saved: bool = True,
 ) -> None:
     """Generate datasets and create them in HDX
 
@@ -39,6 +41,7 @@ def main(
     with wheretostart_tempdir_batch(folder=_USER_AGENT_LOOKUP) as info:
         temp_dir = info["folder"]
         with Download() as downloader:
+            configuration = Configuration.read()
             retriever = Retrieve(
                 downloader=downloader,
                 fallback_dir=temp_dir,
@@ -47,10 +50,12 @@ def main(
                 save=save,
                 use_saved=use_saved,
             )
-            configuration = Configuration.read()
-            #
-            # Steps to generate dataset
-            #
+            dtm = Dtm(
+                configuration=configuration,
+                retriever=retriever,
+                temp_dir=temp_dir,
+            )
+            dataset = dtm.generate_dataset()
             dataset.update_from_yaml(
                 path=join(
                     dirname(__file__), "config", "hdx_dataset_static.yaml"
@@ -73,4 +78,5 @@ if __name__ == "__main__":
         user_agent_lookup=_USER_AGENT_LOOKUP,
         project_config_yaml=join(
             dirname(__file__), "config", "project_configuration.yaml"
+        ),
     )
