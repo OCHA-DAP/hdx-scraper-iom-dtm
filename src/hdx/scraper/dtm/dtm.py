@@ -20,6 +20,8 @@ from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
 
+# TODO: move to config
+
 _ADMIN_LEVELS = [0, 1, 2]
 # _ADMIN_LEVELS = [0]
 
@@ -50,20 +52,13 @@ class Dtm:
         self._temp_dir = temp_dir
 
     def generate_dataset(self) -> Optional[Dataset]:
-        # Dataset info
         dataset = Dataset()
-
-        # dataset.set_time_period(dataset_time_period)
-        # dataset.add_tags(dataset_tags)
-        # Only if needed
-        dataset.set_subnational(True)
-
+        dataset.add_tags(self._configuration["tags"])
         # Generate resources
         # Need all country ISO3s to loop through until DTM has endpoint
         all_iso3s = Country.countriesdata()["countries"].keys()
         # TODO delete
-        all_iso3s = list(all_iso3s)[:10]
-
+        # all_iso3s = list(all_iso3s)[:10]
         # One per admin level
         for admin_level in _ADMIN_LEVELS:
             global_data_for_single_admin_level = []
@@ -85,6 +80,7 @@ class Dtm:
                 # Only download files once we're sure there is data
                 data = self._retriever.download_json(url=url)["result"]
                 global_data_for_single_admin_level += data
+            # TODO: move to config
             filename = f"global-iom-dtm-from-api-admin{admin_level}.csv"
             resourcedata = {
                 "name": f"Global IOM DTM data admin {admin_level}",

@@ -1,11 +1,5 @@
 name: global-iom-dtm-from-api
 title: Global IOM Displacement Tracking Matrix (DTM) from API
-tags:
-  - conflict-violence
-  - displacement
-  - forced displacement
-  - hxl
-  - internally displaced persons-idp
 subnational: True
 license_id: hdx-other
 license_other: >

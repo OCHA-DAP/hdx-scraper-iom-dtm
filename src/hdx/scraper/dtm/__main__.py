@@ -26,8 +26,8 @@ _UPDATED_BY_SCRIPT = "HDX Scraper: dtm"
 
 
 def main(
-    save: bool = False,
-    use_saved: bool = True,
+    save: bool = True,
+    use_saved: bool = False,
 ) -> None:
     """Generate datasets and create them in HDX
 
@@ -73,7 +73,8 @@ def main(
 if __name__ == "__main__":
     facade(
         main,
-        hdx_site="dev",
+        # hdx_site="dev",
+        hdx_site="stage",
         user_agent_config_yaml=join(expanduser("~"), ".useragents.yaml"),
         user_agent_lookup=_USER_AGENT_LOOKUP,
         project_config_yaml=join(
