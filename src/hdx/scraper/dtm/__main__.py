@@ -55,11 +55,20 @@ def main(
                 retriever=retriever,
                 temp_dir=temp_dir,
             )
-            dataset = dtm.generate_dataset()
+
+            qc_indicators = configuration["qc_indicators"]
+            dataset, bites_disabled = dtm.generate_dataset(
+                qc_indicators=qc_indicators
+            )
             dataset.update_from_yaml(
                 path=join(
                     dirname(__file__), "config", "hdx_dataset_static.yaml"
                 )
+            )
+            dataset.generate_quickcharts(
+                -1,
+                bites_disabled=bites_disabled,
+                indicators=qc_indicators,
             )
             dataset.create_in_hdx(
                 remove_additional_resources=True,

@@ -8,7 +8,6 @@ Reads WHO API and creates datasets
 """
 
 import logging
-from typing import Optional
 
 import requests
 
@@ -34,7 +33,7 @@ _HXL_TAGS = {
     "admin1Pcode": "#adm1+code",
     "admin2Name": "#adm2+name",
     "admin2Pcode": "#adm2+code",
-    "numPresentIdpInd": "affected+idps",
+    "numPresentIdpInd": "#affected+idps",
     "reportingDate": "#date+reported",
     "yearReportingDate": "#date+year+reported",
     "monthReportingDate": "#date+month+reported",
@@ -51,14 +50,15 @@ class Dtm:
         self._retriever = retriever
         self._temp_dir = temp_dir
 
-    def generate_dataset(self) -> Optional[Dataset]:
+    def generate_dataset(self, qc_indicators: dict) -> [Dataset, tuple]:
         dataset = Dataset()
         dataset.add_tags(self._configuration["tags"])
         # Generate resources
+        # TODO: get countries from endpoint when available
         # Need all country ISO3s to loop through until DTM has endpoint
         all_iso3s = Country.countriesdata()["countries"].keys()
         # TODO delete
-        # all_iso3s = list(all_iso3s)[:10]
+        # all_iso3s = list(all_iso3s)[:50]
         # One per admin level
         for admin_level in _ADMIN_LEVELS:
             global_data_for_single_admin_level = []
@@ -88,7 +88,22 @@ class Dtm:
                 f"tracking matrix data, "
                 f"at the admin {admin_level}, taken from their API",
             }
-            dataset.generate_resource_from_iterable(
+            if admin_level == 0:
+                quickcharts = {
+                    "hashtag": "#country+code",
+                    "values": [x["code"] for x in qc_indicators],
+                    "numeric_hashtag": "#affected+idps",
+                    "cutdown": 2,
+                    "cutdownhashtags": [
+                        "#country+code",
+                        "#date+reported",
+                        "#affected+idps",
+                    ],
+                    "date_format": "%Y-%m-%dT%H:%M:%S",
+                }
+            else:
+                quickcharts = None
+            _, results = dataset.generate_resource_from_iterable(
                 headers=list(global_data_for_single_admin_level[0].keys()),
                 iterable=global_data_for_single_admin_level,
                 hxltags=_HXL_TAGS,
@@ -96,5 +111,8 @@ class Dtm:
                 filename=filename,
                 resourcedata=resourcedata,
                 datecol="reportingDate",
+                quickcharts=quickcharts,
             )
-        return dataset
+            if admin_level == 0:
+                bites_disabled = results["bites_disabled"]
+        return dataset, bites_disabled

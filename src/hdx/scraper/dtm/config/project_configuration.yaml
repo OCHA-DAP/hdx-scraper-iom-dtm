@@ -6,3 +6,25 @@ tags:
   - forced displacement
   - hxl
   - internally displaced persons-idp
+qc_indicators:
+  - code: "HTI"
+    title: "Haiti"
+    unit: "Number of IDPs"
+    description: "Number of IDPs in Haiti over time"
+    code_col: "#country+code"
+    value_col: "#affected+idps"
+    date_col: "#date+reported"
+  - code: "IRQ"
+    title: "Iraq"
+    unit: "Number of IDPs"
+    description: "Number of IDPs in Iraq over time"
+    code_col: "#country+code"
+    value_col: "#affected+idps"
+    date_col: "#date+reported"
+  - code: "SDN"
+    title: "Sudan"
+    unit: "Number of IDPs"
+    description: "Number of IDPs in Sudan over time"
+    code_col: "#country+code"
+    value_col: "#affected+idps"
+    date_col: "#date+reported"
