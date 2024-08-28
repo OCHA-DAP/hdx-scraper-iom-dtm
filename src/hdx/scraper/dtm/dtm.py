@@ -8,8 +8,7 @@ Reads WHO API and creates datasets
 """
 
 import logging
-
-import requests
+from typing import List
 
 from hdx.api.configuration import Configuration
 from hdx.data.dataset import Dataset
@@ -22,7 +21,6 @@ logger = logging.getLogger(__name__)
 # TODO: move to config
 
 _ADMIN_LEVELS = [0, 1, 2]
-# _ADMIN_LEVELS = [0]
 
 _HXL_TAGS = {
     "id": "#id+code",
@@ -50,57 +48,54 @@ class Dtm:
         self._retriever = retriever
         self._temp_dir = temp_dir
 
-    def generate_dataset(self, qc_indicators: dict) -> [Dataset, tuple]:
+    def get_countries(self) -> List[str]:
+        """Get list of ISO3s to query the API with"""
+        # TODO: switch to using endpoint once it's available
+        countries = Country.countriesdata()["countries"].keys()
+        # TODO delete
+        # countries = list(countries)[:50]
+        return countries
+
+    def generate_dataset(
+        self, countries: List[str], qc_indicators: dict
+    ) -> [Dataset, tuple]:
         dataset = Dataset()
         dataset.add_tags(self._configuration["tags"])
-        # Generate resources
-        # TODO: get countries from endpoint when available
-        # Need all country ISO3s to loop through until DTM has endpoint
-        all_iso3s = Country.countriesdata()["countries"].keys()
-        # TODO delete
-        # all_iso3s = list(all_iso3s)[:50]
-        # One per admin level
+        # Generate resources, one per admin level
         for admin_level in _ADMIN_LEVELS:
             global_data_for_single_admin_level = []
-            for iso3 in all_iso3s:
+            for iso3 in countries:
                 url = self._configuration["API_URL"].format(
                     admin_level=admin_level, iso3=iso3
                 )
-                # Use the requests library to quickly check if there is any
-                # data (skip downloading files as it's too slow)
-                response = requests.get(url).json()
-                if not response["isSuccess"]:
-                    continue
                 # Add country to dataset
                 try:
                     dataset.add_country_location(iso3)
                 except HDXError:
                     logger.error(f"Couldn't find country {iso3}, skipping")
-                    return
+                    continue
                 # Only download files once we're sure there is data
                 data = self._retriever.download_json(url=url)["result"]
+                # Data is empty if country is not present
+                if not data:
+                    logger.warning(
+                        f"Country {iso3} has no data "
+                        f"for admin level {admin_level}"
+                    )
+                    continue
                 global_data_for_single_admin_level += data
-            # TODO: move to config
+            # TODO: move to config?
             filename = f"global-iom-dtm-from-api-admin{admin_level}.csv"
             resourcedata = {
                 "name": f"Global IOM DTM data admin {admin_level}",
                 "description": f"Global IOM displacement "
-                f"tracking matrix data, "
-                f"at the admin {admin_level}, taken from their API",
+                f"tracking matrix data "
+                f"at the admin {admin_level} level, sourced from the DTM API",
             }
             if admin_level == 0:
-                quickcharts = {
-                    "hashtag": "#country+code",
-                    "values": [x["code"] for x in qc_indicators],
-                    "numeric_hashtag": "#affected+idps",
-                    "cutdown": 2,
-                    "cutdownhashtags": [
-                        "#country+code",
-                        "#date+reported",
-                        "#affected+idps",
-                    ],
-                    "date_format": "%Y-%m-%dT%H:%M:%S",
-                }
+                quickcharts = _get_quichcharts_from_indicators(
+                    qc_indicators=qc_indicators
+                )
             else:
                 quickcharts = None
             _, results = dataset.generate_resource_from_iterable(
@@ -116,3 +111,19 @@ class Dtm:
             if admin_level == 0:
                 bites_disabled = results["bites_disabled"]
         return dataset, bites_disabled
+
+
+def _get_quichcharts_from_indicators(qc_indicators: dict) -> dict:
+    # TODO: move to config
+    return {
+        "hashtag": "#country+code",
+        "values": [x["code"] for x in qc_indicators],
+        "numeric_hashtag": "#affected+idps",
+        "cutdown": 2,
+        "cutdownhashtags": [
+            "#country+code",
+            "#date+reported",
+            "#affected+idps",
+        ],
+        "date_format": "%Y-%m-%dT%H:%M:%S",
+    }

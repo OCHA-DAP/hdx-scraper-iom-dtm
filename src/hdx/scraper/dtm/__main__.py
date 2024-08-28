@@ -57,8 +57,9 @@ def main(
             )
 
             qc_indicators = configuration["qc_indicators"]
+            countries = dtm.get_countries()
             dataset, bites_disabled = dtm.generate_dataset(
-                qc_indicators=qc_indicators
+                countries=countries, qc_indicators=qc_indicators
             )
             dataset.update_from_yaml(
                 path=join(
