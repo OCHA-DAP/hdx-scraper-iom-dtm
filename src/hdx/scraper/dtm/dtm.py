@@ -18,27 +18,6 @@ from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
 
-# TODO: move to config
-
-_ADMIN_LEVELS = [0, 1, 2]
-
-_HXL_TAGS = {
-    "id": "#id+code",
-    "operation": "#operation+name",
-    "admin0Name": "#country+name",
-    "admin0Pcode": "#country+code",
-    "admin1Name": "#adm1+name",
-    "admin1Pcode": "#adm1+code",
-    "admin2Name": "#adm2+name",
-    "admin2Pcode": "#adm2+code",
-    "numPresentIdpInd": "#affected+idps",
-    "reportingDate": "#date+reported",
-    "yearReportingDate": "#date+year+reported",
-    "monthReportingDate": "#date+month+reported",
-    "roundNumber": "#round+code",
-    "assessmentType": "#assessment+type",
-}
-
 
 class Dtm:
     def __init__(
@@ -62,7 +41,7 @@ class Dtm:
         dataset = Dataset()
         dataset.add_tags(self._configuration["tags"])
         # Generate resources, one per admin level
-        for admin_level in _ADMIN_LEVELS:
+        for admin_level in self._configuration["admin_levels"]:
             global_data_for_single_admin_level = []
             for iso3 in countries:
                 url = self._configuration["API_URL"].format(
@@ -84,16 +63,8 @@ class Dtm:
                     )
                     continue
                 global_data_for_single_admin_level += data
-            # TODO: move to config?
-            filename = f"global-iom-dtm-from-api-admin{admin_level}.csv"
-            resourcedata = {
-                "name": f"Global IOM DTM data admin {admin_level}",
-                "description": f"Global IOM displacement "
-                f"tracking matrix data "
-                f"at the admin {admin_level} level, sourced from the DTM API",
-            }
             if admin_level == 0:
-                quickcharts = _get_quichcharts_from_indicators(
+                quickcharts = self._get_quichcharts_from_indicators(
                     qc_indicators=qc_indicators
                 )
             else:
@@ -101,10 +72,17 @@ class Dtm:
             _, results = dataset.generate_resource_from_iterable(
                 headers=list(global_data_for_single_admin_level[0].keys()),
                 iterable=global_data_for_single_admin_level,
-                hxltags=_HXL_TAGS,
+                hxltags=self._configuration["hxl_tags"],
                 folder=self._temp_dir,
-                filename=filename,
-                resourcedata=resourcedata,
+                filename=self._configuration["resource_filename"].format(
+                    admin_level=admin_level
+                ),
+                resourcedata={
+                    key: value.format(admin_level=admin_level)
+                    for key, value in self._configuration[
+                        "resource_data"
+                    ].items()
+                },
                 datecol="reportingDate",
                 quickcharts=quickcharts,
             )
@@ -112,18 +90,7 @@ class Dtm:
                 bites_disabled = results["bites_disabled"]
         return dataset, bites_disabled
 
-
-def _get_quichcharts_from_indicators(qc_indicators: dict) -> dict:
-    # TODO: move to config
-    return {
-        "hashtag": "#country+code",
-        "values": [x["code"] for x in qc_indicators],
-        "numeric_hashtag": "#affected+idps",
-        "cutdown": 2,
-        "cutdownhashtags": [
-            "#country+code",
-            "#date+reported",
-            "#affected+idps",
-        ],
-        "date_format": "%Y-%m-%dT%H:%M:%S",
-    }
+    def _get_quichcharts_from_indicators(self, qc_indicators: dict) -> dict:
+        quickcharts = self._configuration["quickcharts"]
+        quickcharts["values"] = [x["code"] for x in qc_indicators]
+        return quickcharts
