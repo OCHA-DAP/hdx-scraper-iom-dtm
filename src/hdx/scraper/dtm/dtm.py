@@ -1,11 +1,5 @@
 #!/usr/bin/python
-"""
-WHO:
-------------
-
-Reads WHO API and creates datasets
-
-"""
+"""DTM scraper"""
 
 import logging
 from typing import List
@@ -63,12 +57,7 @@ class Dtm:
                     )
                     continue
                 global_data_for_single_admin_level += data
-            if admin_level == 0:
-                quickcharts = self._get_quichcharts_from_indicators(
-                    qc_indicators=qc_indicators
-                )
-            else:
-                quickcharts = None
+
             _, results = dataset.generate_resource_from_iterable(
                 headers=list(global_data_for_single_admin_level[0].keys()),
                 iterable=global_data_for_single_admin_level,
@@ -77,6 +66,8 @@ class Dtm:
                 filename=self._configuration["resource_filename"].format(
                     admin_level=admin_level
                 ),
+                # This takes the resource name and description from the config
+                # file, and fills in the corresponding admin level
                 resourcedata={
                     key: value.format(admin_level=admin_level)
                     for key, value in self._configuration[
@@ -84,13 +75,18 @@ class Dtm:
                     ].items()
                 },
                 datecol="reportingDate",
-                quickcharts=quickcharts,
+                # QuickCharts jsut for admin 0
+                quickcharts=self._get_quickcharts_from_indicators(
+                    qc_indicators=qc_indicators
+                )
+                if admin_level == 0
+                else None,
             )
             if admin_level == 0:
                 bites_disabled = results["bites_disabled"]
         return dataset, bites_disabled
 
-    def _get_quichcharts_from_indicators(self, qc_indicators: dict) -> dict:
+    def _get_quickcharts_from_indicators(self, qc_indicators: dict) -> dict:
         quickcharts = self._configuration["quickcharts"]
         quickcharts["values"] = [x["code"] for x in qc_indicators]
         return quickcharts
