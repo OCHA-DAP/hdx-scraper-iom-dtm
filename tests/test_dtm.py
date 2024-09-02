@@ -3,12 +3,13 @@ from os.path import join
 import pytest
 
 from hdx.api.configuration import Configuration
-from hdx.scraper.dtm.dtm import Dtm
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
 from hdx.utilities.retriever import Retrieve
 from hdx.utilities.useragent import UserAgent
+
+from hdx.scraper.dtm.dtm import Dtm
 
 # Use quickchart countries, plus one fake one to test that no errors are made
 _COUNTRIES = ["HTI", "IRQ", "SDN", "ABC"]
