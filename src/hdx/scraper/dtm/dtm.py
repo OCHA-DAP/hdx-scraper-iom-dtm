@@ -5,10 +5,10 @@ import logging
 from typing import List
 
 from hdx.api.configuration import Configuration
+from hdx.utilities.retriever import Retrieve
+
 from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
-from hdx.location.country import Country
-from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +23,10 @@ class Dtm:
 
     def get_countries(self) -> List[str]:
         """Get list of ISO3s to query the API with"""
-        # TODO: switch to using endpoint once it's available
-        countries = Country.countriesdata()["countries"].keys()
-        # TODO delete
-        # countries = list(countries)[:50]
+        data = self._retriever.download_json(
+            url=self._configuration["COUNTRIES_URL"]
+        )["result"]
+        countries = [country_dict["admin0Pcode"] for country_dict in data]
         return countries
 
     def generate_dataset(
@@ -38,7 +38,7 @@ class Dtm:
         for admin_level in self._configuration["admin_levels"]:
             global_data_for_single_admin_level = []
             for iso3 in countries:
-                url = self._configuration["API_URL"].format(
+                url = self._configuration["IDPS_URL"].format(
                     admin_level=admin_level, iso3=iso3
                 )
                 # Add country to dataset

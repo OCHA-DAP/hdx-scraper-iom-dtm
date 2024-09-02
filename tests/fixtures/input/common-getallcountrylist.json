@@ -1,0 +1,20 @@
+{
+  "result": [
+    {
+      "admin0Name": "Haiti",
+      "admin0Pcode": "HTI"
+    },
+    {
+      "admin0Name": "Iraq",
+      "admin0Pcode": "IRQ"
+    },
+    {
+      "admin0Name": "Sudan",
+      "admin0Pcode": "SDN"
+    }
+  ],
+  "statusCode": 200,
+  "isSuccess": true,
+  "errorMessages": [],
+  "totalRecordsCount": 3
+}

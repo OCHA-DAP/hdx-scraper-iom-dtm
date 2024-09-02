@@ -10,9 +10,6 @@ from hdx.utilities.useragent import UserAgent
 
 from hdx.scraper.dtm.dtm import Dtm
 
-# Use quickchart countries, plus one fake one to test that no errors are made
-_COUNTRIES = ["HTI", "IRQ", "SDN", "ABC"]
-
 
 @pytest.fixture(scope="module")
 def expected_dataset():
@@ -184,8 +181,9 @@ class TestDtm:
                     temp_dir=tempdir,
                 )
                 qc_indicators = configuration["qc_indicators"]
+                countries = dtm.get_countries()
                 dataset, bites_disabled = dtm.generate_dataset(
-                    countries=_COUNTRIES, qc_indicators=qc_indicators
+                    countries=countries, qc_indicators=qc_indicators
                 )
                 dataset.update_from_yaml(
                     path=join(config_dir, "hdx_dataset_static.yaml")
