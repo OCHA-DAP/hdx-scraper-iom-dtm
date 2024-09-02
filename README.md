@@ -39,6 +39,9 @@ For the script to run, you will need to have a file called
 
 To install and run, execute:
 
+    pip install .
+    python -m hdx.scraper.dtm
+
 ## Environment
 
 Development is currently done using Python 3.11. We recommend using a virtual

@@ -16,6 +16,8 @@ from hdx.utilities.path import (
 )
 from hdx.utilities.retriever import Retrieve
 
+from .dtm import Dtm
+
 logger = logging.getLogger(__name__)
 
 _USER_AGENT_LOOKUP = "hdx-scraper-dtm"
@@ -39,6 +41,7 @@ def main(
     with wheretostart_tempdir_batch(folder=_USER_AGENT_LOOKUP) as info:
         temp_dir = info["folder"]
         with Download() as downloader:
+            configuration = Configuration.read()
             retriever = Retrieve(
                 downloader=downloader,
                 fallback_dir=temp_dir,
@@ -47,14 +50,26 @@ def main(
                 save=save,
                 use_saved=use_saved,
             )
-            configuration = Configuration.read()
-            #
-            # Steps to generate dataset
-            #
+            dtm = Dtm(
+                configuration=configuration,
+                retriever=retriever,
+                temp_dir=temp_dir,
+            )
+
+            qc_indicators = configuration["qc_indicators"]
+            countries = dtm.get_countries()
+            dataset, bites_disabled = dtm.generate_dataset(
+                countries=countries, qc_indicators=qc_indicators
+            )
             dataset.update_from_yaml(
                 path=join(
                     dirname(__file__), "config", "hdx_dataset_static.yaml"
                 )
+            )
+            dataset.generate_quickcharts(
+                -1,
+                bites_disabled=bites_disabled,
+                indicators=qc_indicators,
             )
             dataset.create_in_hdx(
                 remove_additional_resources=True,
@@ -68,9 +83,11 @@ def main(
 if __name__ == "__main__":
     facade(
         main,
-        hdx_site="dev",
+        # hdx_site="dev",
+        hdx_site="stage",
         user_agent_config_yaml=join(expanduser("~"), ".useragents.yaml"),
         user_agent_lookup=_USER_AGENT_LOOKUP,
         project_config_yaml=join(
             dirname(__file__), "config", "project_configuration.yaml"
+        ),
     )

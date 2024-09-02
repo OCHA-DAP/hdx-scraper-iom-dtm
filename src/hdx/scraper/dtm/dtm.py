@@ -1,33 +1,19 @@
 #!/usr/bin/python
-"""
-WHO:
-------------
-
-Reads WHO API and creates datasets
-
-"""
+"""DTM scraper"""
 
 import logging
-import zipfile
-from copy import deepcopy
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import List, Optional
-
+from typing import List
 
 from hdx.api.configuration import Configuration
 from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
-from hdx.data.resource import Resource
-from hdx.data.vocabulary import Vocabulary
 from hdx.location.country import Country
 from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
 
 
-class dtm:
-
+class Dtm:
     def __init__(
         self, configuration: Configuration, retriever: Retrieve, temp_dir: str
     ):
@@ -35,40 +21,72 @@ class dtm:
         self._retriever = retriever
         self._temp_dir = temp_dir
 
+    def get_countries(self) -> List[str]:
+        """Get list of ISO3s to query the API with"""
+        # TODO: switch to using endpoint once it's available
+        countries = Country.countriesdata()["countries"].keys()
+        # TODO delete
+        # countries = list(countries)[:50]
+        return countries
 
-    def generate_dataset(self) -> Optional[Dataset]:
+    def generate_dataset(
+        self, countries: List[str], qc_indicators: dict
+    ) -> [Dataset, tuple]:
+        dataset = Dataset()
+        dataset.add_tags(self._configuration["tags"])
+        # Generate resources, one per admin level
+        for admin_level in self._configuration["admin_levels"]:
+            global_data_for_single_admin_level = []
+            for iso3 in countries:
+                url = self._configuration["API_URL"].format(
+                    admin_level=admin_level, iso3=iso3
+                )
+                # Add country to dataset
+                try:
+                    dataset.add_country_location(iso3)
+                except HDXError:
+                    logger.error(f"Couldn't find country {iso3}, skipping")
+                    continue
+                # Only download files once we're sure there is data
+                data = self._retriever.download_json(url=url)["result"]
+                # Data is empty if country is not present
+                if not data:
+                    logger.warning(
+                        f"Country {iso3} has no data "
+                        f"for admin level {admin_level}"
+                    )
+                    continue
+                global_data_for_single_admin_level += data
 
-        # To be generated
-        dataset_name = None
-        dataset_title = None
-        dataset_time_period = None
-        dataset_tags = None
-        dataset_country_iso3 = None
+            _, results = dataset.generate_resource_from_iterable(
+                headers=list(global_data_for_single_admin_level[0].keys()),
+                iterable=global_data_for_single_admin_level,
+                hxltags=self._configuration["hxl_tags"],
+                folder=self._temp_dir,
+                filename=self._configuration["resource_filename"].format(
+                    admin_level=admin_level
+                ),
+                # This takes the resource name and description from the config
+                # file, and fills in the corresponding admin level
+                resourcedata={
+                    key: value.format(admin_level=admin_level)
+                    for key, value in self._configuration[
+                        "resource_data"
+                    ].items()
+                },
+                datecol="reportingDate",
+                # QuickCharts jsut for admin 0
+                quickcharts=self._get_quickcharts_from_indicators(
+                    qc_indicators=qc_indicators
+                )
+                if admin_level == 0
+                else None,
+            )
+            if admin_level == 0:
+                bites_disabled = results["bites_disabled"]
+        return dataset, bites_disabled
 
-        # Dataset info
-        dataset = Dataset(
-            {
-                "name": dataset_name,
-                "title": dataset_title,
-                "notes": self._configuration["dataset_notes"],
-            }
-        )
-
-        dataset.set_time_period(dataset_time_period)
-        dataset.add_tagsa(dataset_tags)
-        dataset.set_maintainer(self._configuration["dataset_maintainer"])
-        dataset.set_organization(self._configuration["dataset_organization"])
-        dataset.set_expected_update_frequency(
-            self._configuration["dataset_expected_update_frequency"]
-        )
-        # Only if needed
-        dataset.set_subnational(True)
-        try:
-            dataset.add_country_location(dataset_country_iso3)
-        except HDXError:
-            logger.error(f"Couldn't find country {dataset_country_iso3}, skipping")
-            return
-
-        # Add resources here
-
-        return dataset
+    def _get_quickcharts_from_indicators(self, qc_indicators: dict) -> dict:
+        quickcharts = self._configuration["quickcharts"]
+        quickcharts["values"] = [x["code"] for x in qc_indicators]
+        return quickcharts
