@@ -1,7 +1,6 @@
 from os.path import join
 
 import pytest
-
 from hdx.api.configuration import Configuration
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import Download
