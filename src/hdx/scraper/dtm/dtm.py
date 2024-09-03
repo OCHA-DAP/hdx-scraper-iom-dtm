@@ -34,10 +34,10 @@ class Dtm:
     ) -> [Dataset, tuple]:
         dataset = Dataset()
         dataset.add_tags(self._configuration["tags"])
-        # Generate resources, one per admin level
-        for admin_level in self._configuration["admin_levels"]:
-            global_data_for_single_admin_level = []
-            for iso3 in countries:
+        # Generate a single resource for all admin levels
+        global_data = []
+        for iso3 in countries:
+            for admin_level in self._configuration["admin_levels"]:
                 url = self._configuration["IDPS_URL"].format(
                     admin_level=admin_level, iso3=iso3
                 )
@@ -45,7 +45,10 @@ class Dtm:
                 try:
                     dataset.add_country_location(iso3)
                 except HDXError:
-                    logger.error(f"Couldn't find country {iso3}, skipping")
+                    logger.error(
+                        f"Couldn't find country {iso3} for admin "
+                        f"level {admin_level}, skipping"
+                    )
                     continue
                 # Only download files once we're sure there is data
                 data = self._retriever.download_json(url=url)["result"]
@@ -56,35 +59,22 @@ class Dtm:
                         f"for admin level {admin_level}"
                     )
                     continue
-                global_data_for_single_admin_level += data
+                global_data += data
 
-            _, results = dataset.generate_resource_from_iterable(
-                headers=list(global_data_for_single_admin_level[0].keys()),
-                iterable=global_data_for_single_admin_level,
-                hxltags=self._configuration["hxl_tags"],
-                folder=self._temp_dir,
-                filename=self._configuration["resource_filename"].format(
-                    admin_level=admin_level
-                ),
-                # This takes the resource name and description from the config
-                # file, and fills in the corresponding admin level
-                resourcedata={
-                    key: value.format(admin_level=admin_level)
-                    for key, value in self._configuration[
-                        "resource_data"
-                    ].items()
-                },
-                datecol="reportingDate",
-                # QuickCharts jsut for admin 0
-                quickcharts=self._get_quickcharts_from_indicators(
-                    qc_indicators=qc_indicators
-                )
-                if admin_level == 0
-                else None,
-            )
-            if admin_level == 0:
-                bites_disabled = results["bites_disabled"]
-        return dataset, bites_disabled
+        _, results = dataset.generate_resource_from_iterable(
+            headers=list(self._configuration["hxl_tags"].keys()),
+            iterable=global_data,
+            hxltags=self._configuration["hxl_tags"],
+            folder=self._temp_dir,
+            filename=self._configuration["resource_filename"],
+            # Resource name and description from the config
+            resourcedata=self._configuration["resource_data"],
+            datecol="reportingDate",
+            quickcharts=self._get_quickcharts_from_indicators(
+                qc_indicators=qc_indicators
+            ),
+        )
+        return dataset, results["bites_disabled"]
 
     def _get_quickcharts_from_indicators(self, qc_indicators: dict) -> dict:
         quickcharts = self._configuration["quickcharts"]

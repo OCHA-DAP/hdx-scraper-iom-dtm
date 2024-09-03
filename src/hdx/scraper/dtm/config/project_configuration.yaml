@@ -7,12 +7,12 @@ tags:
   - forced displacement
   - hxl
   - internally displaced persons-idp
-resource_filename: global-iom-dtm-from-api-admin{admin_level}.csv
+resource_filename: global-iom-dtm-from-api-admin-0-to-2.csv
 resource_data:
-  name: Global IOM DTM data admin {admin_level}
+  name: Global IOM DTM data for admin levels 0-2
   description: >-
     Global IOM displacement tracking matrix data
-    at the admin {admin_level} level, sourced from the DTM API
+    at admin levels 0, 1, and 2, sourced from the DTM API
 qc_indicators:
   - code: "HTI"
     title: "Haiti"

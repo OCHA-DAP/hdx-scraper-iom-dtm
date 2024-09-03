@@ -91,38 +91,18 @@ def expected_resources():
         {
             "dataset_preview_enabled": "False",
             "description": "Global IOM displacement tracking "
-            "matrix data at the admin 0 "
-            "level, sourced from the DTM API",
+            "matrix data at admin levels "
+            "0, 1, and 2, sourced from the DTM API",
             "format": "csv",
-            "name": "Global IOM DTM data admin 0",
-            "resource_type": "file.upload",
-            "url_type": "upload",
-        },
-        {
-            "dataset_preview_enabled": "False",
-            "description": "Cut down data for QuickCharts",
-            "format": "csv",
-            "name": "QuickCharts-Global IOM DTM data admin 0",
-            "resource_type": "file.upload",
-            "url_type": "upload",
-        },
-        {
-            "dataset_preview_enabled": "False",
-            "description": "Global IOM displacement tracking "
-            "matrix data at the admin 1 "
-            "level, sourced from the DTM API",
-            "format": "csv",
-            "name": "Global IOM DTM data admin 1",
+            "name": "Global IOM DTM data for admin levels 0-2",
             "resource_type": "file.upload",
             "url_type": "upload",
         },
         {
             "dataset_preview_enabled": "True",
-            "description": "Global IOM displacement tracking "
-            "matrix data at the admin 2 "
-            "level, sourced from the DTM API",
+            "description": "Cut down data for QuickCharts",
             "format": "csv",
-            "name": "Global IOM DTM data admin 2",
+            "name": "QuickCharts-Global IOM DTM data for admin " "levels 0-2",
             "resource_type": "file.upload",
             "url_type": "upload",
         },
@@ -198,10 +178,8 @@ class TestDtm:
                 assert dataset.get_resources() == expected_resources
 
                 filename_list = [
-                    "global-iom-dtm-from-api-admin0.csv",
-                    "global-iom-dtm-from-api-admin1.csv",
-                    "global-iom-dtm-from-api-admin2.csv",
-                    "qc_global-iom-dtm-from-api-admin0.csv",
+                    "global-iom-dtm-from-api-admin-0-to-2.csv",
+                    "qc_global-iom-dtm-from-api-admin-0-to-2.csv",
                 ]
                 for filename in filename_list:
                     assert_files_same(
