@@ -1,6 +1,7 @@
 # Collector specific configuration
 IDPS_URL: "https://dtmapi.iom.int/api/IdpAdmin{admin_level}Data/GetAdmin{admin_level}Datav2?Admin0Pcode={iso3}"
 COUNTRIES_URL: "https://dtmapi.iom.int/api/Common/GetAllCountryList"
+OPERATION_STATUS_URL: "https://dtmapi.iom.int/api/Common/GetAllOperationList"
 tags:
   - conflict-violence
   - displacement
@@ -40,3 +41,4 @@ hxl_tags:
   monthReportingDate: "#date+month+reported"
   roundNumber: "#round+code"
   assessmentType: "#assessment+type"
+  operationStatus: "#operation+status"

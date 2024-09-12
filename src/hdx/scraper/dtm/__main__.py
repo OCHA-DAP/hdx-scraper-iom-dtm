@@ -28,8 +28,8 @@ _UPDATED_BY_SCRIPT = "HDX Scraper: dtm"
 
 
 def main(
-    save: bool = False,
-    use_saved: bool = True,
+    save: bool = True,
+    use_saved: bool = False,
 ) -> None:
     """Generate datasets and create them in HDX
 
@@ -59,7 +59,10 @@ def main(
             )
 
             countries = dtm.get_countries()
-            dataset = dtm.generate_dataset(countries=countries)
+            operation_status = dtm.get_operation_status()
+            dataset = dtm.generate_dataset(
+                countries=countries, operation_status=operation_status
+            )
             dataset.update_from_yaml(
                 path=join(
                     dirname(__file__), "config", "hdx_dataset_static.yaml"

@@ -2,6 +2,7 @@
 """DTM scraper"""
 
 import logging
+from collections import defaultdict
 from typing import List
 
 import pandas as pd
@@ -30,7 +31,20 @@ class Dtm:
         countries = [country_dict["admin0Pcode"] for country_dict in data]
         return countries
 
-    def generate_dataset(self, countries: List[str]) -> Dataset:
+    def get_operation_status(self) -> defaultdict:
+        data = self._retriever.download_json(
+            url=self._configuration["OPERATION_STATUS_URL"]
+        )["result"]
+        operation_status = defaultdict(dict)
+        for row in data:
+            operation_status[row["admin0Pcode"]][row["operation"]] = row[
+                "operationStatus"
+            ]
+        return operation_status
+
+    def generate_dataset(
+        self, countries: List[str], operation_status: defaultdict
+    ) -> Dataset:
         dataset = Dataset()
         dataset.add_tags(self._configuration["tags"])
         # Generate a single resource for all admin levels
@@ -51,6 +65,17 @@ class Dtm:
                     continue
                 # Only download files once we're sure there is data
                 data = self._retriever.download_json(url=url)["result"]
+                # For each row in the data add the operation status
+                for row in data:
+                    try:
+                        row["operationStatus"] = operation_status[iso3][
+                            row["operation"]
+                        ]
+                    except KeyError:
+                        logger.warning(
+                            f"Operation status {iso3}:"
+                            f"{row['operation_status']} missing"
+                        )
                 # Data is empty if country is not present
                 if not data:
                     logger.warning(
@@ -95,7 +120,6 @@ class Dtm:
                 )["reportingDate"].idxmax()
             ]
         )
-        print(df)
 
         # Generate quickchart resource
         dataset.generate_resource_from_iterable(
