@@ -93,6 +93,9 @@ class Dtm:
                     ["admin0Pcode", "operation", "yearReportingDate"]
                 )["reportingDate"].idxmax()
             ]
+            # # Sum the IDPs over operations per country and year
+            # .groupby(['admin0Pcode', 'yearReportingDate'],
+            # as_index=False)['numPresentIdpInd'].sum()
         )
 
         # Generate quickchart resource
