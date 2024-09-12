@@ -4,6 +4,7 @@
 import logging
 from typing import List
 
+import pandas as pd
 from hdx.api.configuration import Configuration
 from hdx.utilities.retriever import Retrieve
 
@@ -61,7 +62,7 @@ class Dtm:
                     continue
                 global_data += data
 
-        _, results = dataset.generate_resource_from_iterable(
+        dataset.generate_resource_from_iterable(
             headers=list(self._configuration["hxl_tags"].keys()),
             iterable=global_data,
             hxltags=self._configuration["hxl_tags"],
@@ -70,10 +71,44 @@ class Dtm:
             # Resource name and description from the config
             resourcedata=self._configuration["resource_data"],
             datecol="reportingDate",
+        )
+
+        # Filter data for quickcharts
+        df = (
+            pd.DataFrame(global_data)
+            # Only take admin 0
+            .query("admin1Pcode.isna()")
+            # Then drop the extra columns
+            .drop(
+                columns=[
+                    "admin1Name",
+                    "admin1Pcode",
+                    "admin2Name",
+                    "admin2Pcode",
+                ]
+            )
+            # Take the latest numbers per country, year, and operation
+            .loc[
+                lambda x: x.groupby(
+                    ["admin0Pcode", "operation", "yearReportingDate"]
+                )["reportingDate"].idxmax()
+            ]
+        )
+
+        # Generate quickchart resource
+        _, results = dataset.generate_resource_from_iterable(
+            headers=list(df.columns),
+            iterable=df.to_dict("records"),
+            hxltags=self._configuration["hxl_tags"],
+            folder=self._temp_dir,
+            filename=self._configuration["qc_resource_filename"],
+            # Resource name and description from the config
+            resourcedata=self._configuration["qc_resource_data"],
             quickcharts=self._get_quickcharts_from_indicators(
                 qc_indicators=qc_indicators
             ),
         )
+
         return dataset, results["bites_disabled"]
 
     def _get_quickcharts_from_indicators(self, qc_indicators: dict) -> dict:

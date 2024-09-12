@@ -9,12 +9,13 @@ import logging
 from os.path import dirname, expanduser, join
 
 from hdx.api.configuration import Configuration
-from hdx.facades.infer_arguments import facade
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import (
     wheretostart_tempdir_batch,
 )
 from hdx.utilities.retriever import Retrieve
+
+from hdx.facades.infer_arguments import facade
 
 from .dtm import Dtm
 
@@ -26,8 +27,8 @@ _UPDATED_BY_SCRIPT = "HDX Scraper: dtm"
 
 
 def main(
-    save: bool = True,
-    use_saved: bool = False,
+    save: bool = False,
+    use_saved: bool = True,
 ) -> None:
     """Generate datasets and create them in HDX
 
