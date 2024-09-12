@@ -30,9 +30,7 @@ class Dtm:
         countries = [country_dict["admin0Pcode"] for country_dict in data]
         return countries
 
-    def generate_dataset(
-        self, countries: List[str], qc_indicators: dict
-    ) -> [Dataset, tuple]:
+    def generate_dataset(self, countries: List[str]) -> Dataset:
         dataset = Dataset()
         dataset.add_tags(self._configuration["tags"])
         # Generate a single resource for all admin levels
@@ -93,13 +91,10 @@ class Dtm:
                     ["admin0Pcode", "operation", "yearReportingDate"]
                 )["reportingDate"].idxmax()
             ]
-            # # Sum the IDPs over operations per country and year
-            # .groupby(['admin0Pcode', 'yearReportingDate'],
-            # as_index=False)['numPresentIdpInd'].sum()
         )
 
         # Generate quickchart resource
-        _, results = dataset.generate_resource_from_iterable(
+        dataset.generate_resource_from_iterable(
             headers=list(df.columns),
             iterable=df.to_dict("records"),
             hxltags=self._configuration["hxl_tags"],
@@ -107,14 +102,6 @@ class Dtm:
             filename=self._configuration["qc_resource_filename"],
             # Resource name and description from the config
             resourcedata=self._configuration["qc_resource_data"],
-            quickcharts=self._get_quickcharts_from_indicators(
-                qc_indicators=qc_indicators
-            ),
         )
 
-        return dataset, results["bites_disabled"]
-
-    def _get_quickcharts_from_indicators(self, qc_indicators: dict) -> dict:
-        quickcharts = self._configuration["quickcharts"]
-        quickcharts["values"] = [x["code"] for x in qc_indicators]
-        return quickcharts
+        return dataset
