@@ -74,8 +74,11 @@ class Dtm:
         # Filter data for quickcharts
         df = (
             pd.DataFrame(global_data)
-            # Only take admin 0
-            .query("admin1Pcode.isna()")
+            # Only take admin 0, and required countries
+            .loc[
+                lambda x: x["admin1Pcode"].isna()
+                & x["admin0Pcode"].isin(self._configuration["qc_countries"])
+            ]
             # Then drop the extra columns
             .drop(
                 columns=[
@@ -92,6 +95,7 @@ class Dtm:
                 )["reportingDate"].idxmax()
             ]
         )
+        print(df)
 
         # Generate quickchart resource
         dataset.generate_resource_from_iterable(
