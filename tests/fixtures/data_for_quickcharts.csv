@@ -1,0 +1,33 @@
+id,operation,admin0Name,admin0Pcode,numPresentIdpInd,reportingDate,yearReportingDate,monthReportingDate,roundNumber,assessmentType,operationStatus
+#id+code,#operation+name,#country+name,#country+code,#affected+idps,#date+reported,#date+year+reported,#date+month+reported,#round+code,#assessment+type,#operation+status
+137,Returns and displacement in Afghanistan,Afghanistan,AFG,1728157,2017-12-31T00:00:00,2017,12,3,BA,Active
+203,Returns and displacement in Afghanistan,Afghanistan,AFG,3529971,2018-12-31T00:00:00,2018,12,7,BA,Active
+235,Returns and displacement in Afghanistan,Afghanistan,AFG,4350900,2019-12-31T00:00:00,2019,12,9,BA,Active
+287,Returns and displacement in Afghanistan,Afghanistan,AFG,4937277,2020-12-31T00:00:00,2020,12,11,BA,Active
+374,Returns and displacement in Afghanistan,Afghanistan,AFG,5832454,2021-12-31T00:00:00,2021,12,14,BA,Active
+444,Returns and displacement in Afghanistan,Afghanistan,AFG,6557855,2022-12-31T00:00:00,2022,12,16,BA,Active
+439,Countrywide monitoring,Haiti,HTI,155166,2022-11-30T00:00:00,2022,11,2,BA,Active
+550,Countrywide monitoring,Haiti,HTI,197999,2023-11-30T00:00:00,2023,11,5,BA,Active
+1138,Countrywide monitoring,Haiti,HTI,578074,2024-05-31T00:00:00,2024,5,7,BA,Active
+347,Earthquake (August-2021),Haiti,HTI,24425,2021-08-27T00:00:00,2021,8,2,SA,Active
+1080,Haiti Earthquake,Haiti,HTI,1068882,2010-11-30T00:00:00,2010,11,1,SA,Inactive
+1090,Haiti Earthquake,Haiti,HTI,519164,2011-11-30T00:00:00,2011,11,7,SA,Inactive
+1109,Haiti Earthquake,Haiti,HTI,347284,2012-12-31T00:00:00,2012,12,13,SA,Inactive
+1121,Haiti Earthquake,Haiti,HTI,146446,2013-12-30T00:00:00,2013,12,17,SA,Inactive
+575,Haiti Earthquake,Haiti,HTI,79397,2014-12-30T00:00:00,2014,12,21,SA,Inactive
+1021,Haiti Earthquake,Haiti,HTI,59720,2015-12-31T00:00:00,2015,12,24,SA,Inactive
+710,Haiti Earthquake,Haiti,HTI,46691,2016-12-31T00:00:00,2016,12,28,SA,Inactive
+801,Haiti Earthquake,Haiti,HTI,34773,2017-10-31T00:00:00,2017,10,31,SA,Inactive
+164,Haiti Earthquake,Haiti,HTI,37497,2018-03-30T00:00:00,2018,3,32,SA,Inactive
+208,Haiti Earthquake,Haiti,HTI,34508,2019-01-30T00:00:00,2019,1,33,SA,Inactive
+708,Hurricane Matthew,Haiti,HTI,42553,2016-12-31T00:00:00,2016,12,2,SA,Inactive
+776,Hurricane Matthew,Haiti,HTI,1593,2017-09-30T00:00:00,2017,9,1,SA,Inactive
+773,Hurricane Season in the Caribbean (2017),Haiti,HTI,10388,2017-09-01T00:00:00,2017,9,1,BA,Inactive
+777,Lake Chad Basin Crisis,Chad,TCD,147032,2017-09-30T00:00:00,2017,9,1,BA,Active
+194,Lake Chad Basin Crisis,Chad,TCD,126313,2018-12-30T00:00:00,2018,12,6,SA,Active
+988,Lake Chad Basin Crisis,Chad,TCD,169003,2019-09-30T00:00:00,2019,9,9,BA,Active
+263,Lake Chad Basin Crisis,Chad,TCD,336124,2020-10-30T00:00:00,2020,10,13,BA,Active
+378,Lake Chad Basin Crisis,Chad,TCD,381289,2021-12-31T00:00:00,2021,12,17,BA,Active
+409,Lake Chad Basin Crisis,Chad,TCD,200031,2022-07-30T00:00:00,2022,7,18,BA,Active
+552,Lake Chad Basin Crisis,Chad,TCD,199198,2023-11-30T00:00:00,2023,11,21,BA,Active
+1151,Lake Chad Basin Crisis,Chad,TCD,220610,2024-06-30T00:00:00,2024,6,23,BA,Active

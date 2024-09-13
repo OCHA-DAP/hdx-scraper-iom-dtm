@@ -2,13 +2,14 @@
 """DTM scraper"""
 
 import logging
+from collections import defaultdict
 from typing import List
 
+import pandas as pd
 from hdx.api.configuration import Configuration
-from hdx.utilities.retriever import Retrieve
-
 from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
+from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +30,26 @@ class Dtm:
         countries = [country_dict["admin0Pcode"] for country_dict in data]
         return countries
 
+    def get_operation_status(self) -> defaultdict:
+        data = self._retriever.download_json(
+            url=self._configuration["OPERATION_STATUS_URL"]
+        )["result"]
+        operation_status = defaultdict(dict)
+        for row in data:
+            operation_status[row["admin0Pcode"]][row["operation"]] = row[
+                "operationStatus"
+            ]
+        return operation_status
+
     def generate_dataset(
-        self, countries: List[str], qc_indicators: dict
-    ) -> [Dataset, tuple]:
+        self, countries: List[str], operation_status: defaultdict
+    ) -> Dataset:
         dataset = Dataset()
         dataset.add_tags(self._configuration["tags"])
-        # Generate resources, one per admin level
-        for admin_level in self._configuration["admin_levels"]:
-            global_data_for_single_admin_level = []
-            for iso3 in countries:
+        # Generate a single resource for all admin levels
+        global_data = []
+        for iso3 in countries:
+            for admin_level in self._configuration["admin_levels"]:
                 url = self._configuration["IDPS_URL"].format(
                     admin_level=admin_level, iso3=iso3
                 )
@@ -45,10 +57,24 @@ class Dtm:
                 try:
                     dataset.add_country_location(iso3)
                 except HDXError:
-                    logger.error(f"Couldn't find country {iso3}, skipping")
+                    logger.error(
+                        f"Couldn't find country {iso3} for admin "
+                        f"level {admin_level}, skipping"
+                    )
                     continue
                 # Only download files once we're sure there is data
                 data = self._retriever.download_json(url=url)["result"]
+                # For each row in the data add the operation status
+                for row in data:
+                    try:
+                        row["operationStatus"] = operation_status[iso3][
+                            row["operation"]
+                        ]
+                    except KeyError:
+                        logger.warning(
+                            f"Operation status {iso3}:"
+                            f"{row['operation_status']} missing"
+                        )
                 # Data is empty if country is not present
                 if not data:
                     logger.warning(
@@ -56,37 +82,53 @@ class Dtm:
                         f"for admin level {admin_level}"
                     )
                     continue
-                global_data_for_single_admin_level += data
+                global_data += data
 
-            _, results = dataset.generate_resource_from_iterable(
-                headers=list(global_data_for_single_admin_level[0].keys()),
-                iterable=global_data_for_single_admin_level,
-                hxltags=self._configuration["hxl_tags"],
-                folder=self._temp_dir,
-                filename=self._configuration["resource_filename"].format(
-                    admin_level=admin_level
-                ),
-                # This takes the resource name and description from the config
-                # file, and fills in the corresponding admin level
-                resourcedata={
-                    key: value.format(admin_level=admin_level)
-                    for key, value in self._configuration[
-                        "resource_data"
-                    ].items()
-                },
-                datecol="reportingDate",
-                # QuickCharts jsut for admin 0
-                quickcharts=self._get_quickcharts_from_indicators(
-                    qc_indicators=qc_indicators
-                )
-                if admin_level == 0
-                else None,
+        dataset.generate_resource_from_iterable(
+            headers=list(self._configuration["hxl_tags"].keys()),
+            iterable=global_data,
+            hxltags=self._configuration["hxl_tags"],
+            folder=self._temp_dir,
+            filename=self._configuration["resource_filename"],
+            # Resource name and description from the config
+            resourcedata=self._configuration["resource_data"],
+            datecol="reportingDate",
+        )
+
+        # Filter data for quickcharts
+        df = (
+            pd.DataFrame(global_data)
+            # Only take admin 0, and required countries
+            .loc[
+                lambda x: x["admin1Pcode"].isna()
+                & x["admin0Pcode"].isin(self._configuration["qc_countries"])
+            ]
+            # Then drop the extra columns
+            .drop(
+                columns=[
+                    "admin1Name",
+                    "admin1Pcode",
+                    "admin2Name",
+                    "admin2Pcode",
+                ]
             )
-            if admin_level == 0:
-                bites_disabled = results["bites_disabled"]
-        return dataset, bites_disabled
+            # Take the latest numbers per country, year, and operation
+            .loc[
+                lambda x: x.groupby(
+                    ["admin0Pcode", "operation", "yearReportingDate"]
+                )["reportingDate"].idxmax()
+            ]
+        )
 
-    def _get_quickcharts_from_indicators(self, qc_indicators: dict) -> dict:
-        quickcharts = self._configuration["quickcharts"]
-        quickcharts["values"] = [x["code"] for x in qc_indicators]
-        return quickcharts
+        # Generate quickchart resource
+        dataset.generate_resource_from_iterable(
+            headers=list(df.columns),
+            iterable=df.to_dict("records"),
+            hxltags=self._configuration["hxl_tags"],
+            folder=self._temp_dir,
+            filename=self._configuration["qc_resource_filename"],
+            # Resource name and description from the config
+            resourcedata=self._configuration["qc_resource_data"],
+        )
+
+        return dataset

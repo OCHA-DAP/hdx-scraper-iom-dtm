@@ -12,6 +12,7 @@ from hdx.api.configuration import Configuration
 from hdx.facades.infer_arguments import facade
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import (
+    script_dir_plus_file,
     wheretostart_tempdir_batch,
 )
 from hdx.utilities.retriever import Retrieve
@@ -56,10 +57,10 @@ def main(
                 temp_dir=temp_dir,
             )
 
-            qc_indicators = configuration["qc_indicators"]
             countries = dtm.get_countries()
-            dataset, bites_disabled = dtm.generate_dataset(
-                countries=countries, qc_indicators=qc_indicators
+            operation_status = dtm.get_operation_status()
+            dataset = dtm.generate_dataset(
+                countries=countries, operation_status=operation_status
             )
             dataset.update_from_yaml(
                 path=join(
@@ -67,9 +68,11 @@ def main(
                 )
             )
             dataset.generate_quickcharts(
-                -1,
-                bites_disabled=bites_disabled,
-                indicators=qc_indicators,
+                resource=1,
+                path=script_dir_plus_file(
+                    join("config", "hdx_resource_view_static.yaml"),
+                    main,
+                ),
             )
             dataset.create_in_hdx(
                 remove_additional_resources=True,
@@ -83,8 +86,6 @@ def main(
 if __name__ == "__main__":
     facade(
         main,
-        # hdx_site="dev",
-        hdx_site="stage",
         user_agent_config_yaml=join(expanduser("~"), ".useragents.yaml"),
         user_agent_lookup=_USER_AGENT_LOOKUP,
         project_config_yaml=join(

@@ -1,49 +1,27 @@
 # Collector specific configuration
 IDPS_URL: "https://dtmapi.iom.int/api/IdpAdmin{admin_level}Data/GetAdmin{admin_level}Datav2?Admin0Pcode={iso3}"
 COUNTRIES_URL: "https://dtmapi.iom.int/api/Common/GetAllCountryList"
+OPERATION_STATUS_URL: "https://dtmapi.iom.int/api/Common/GetAllOperationList"
 tags:
   - conflict-violence
   - displacement
   - forced displacement
   - hxl
   - internally displaced persons-idp
-resource_filename: global-iom-dtm-from-api-admin{admin_level}.csv
+resource_filename: global-iom-dtm-from-api-admin-0-to-2.csv
 resource_data:
-  name: Global IOM DTM data admin {admin_level}
+  name: Global IOM DTM data for admin levels 0-2
   description: >-
     Global IOM displacement tracking matrix data
-    at the admin {admin_level} level, sourced from the DTM API
-qc_indicators:
-  - code: "HTI"
-    title: "Haiti"
-    unit: "Number of IDPs"
-    description: "Number of IDPs in Haiti over time"
-    code_col: "#country+code"
-    value_col: "#affected+idps"
-    date_col: "#date+reported"
-  - code: "IRQ"
-    title: "Iraq"
-    unit: "Number of IDPs"
-    description: "Number of IDPs in Iraq over time"
-    code_col: "#country+code"
-    value_col: "#affected+idps"
-    date_col: "#date+reported"
-  - code: "SDN"
-    title: "Sudan"
-    unit: "Number of IDPs"
-    description: "Number of IDPs in Sudan over time"
-    code_col: "#country+code"
-    value_col: "#affected+idps"
-    date_col: "#date+reported"
-quickcharts:
-  hashtag: "#country+code"
-  numeric_hashtag: "#affected+idps"
-  cutdown: 2
-  cutdownhashtags:
-    - "#country+code"
-    - "#date+reported"
-    - "#affected+idps"
-  date_format: "%Y-%m-%dT%H:%M:%S"
+    at admin levels 0, 1, and 2, sourced from the DTM API
+qc_resource_filename: data_for_quickcharts.csv
+qc_resource_data:
+  name: Data for QuickCharts
+  description: Filtered and aggregated data used to create QuickCharts
+qc_countries:
+  - AFG
+  - HTI
+  - TCD
 admin_levels:
   - 0
   - 1
@@ -63,3 +41,4 @@ hxl_tags:
   monthReportingDate: "#date+month+reported"
   roundNumber: "#round+code"
   assessmentType: "#assessment+type"
+  operationStatus: "#operation+status"

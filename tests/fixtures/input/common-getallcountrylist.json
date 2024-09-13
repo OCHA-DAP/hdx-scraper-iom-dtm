@@ -5,12 +5,12 @@
       "admin0Pcode": "HTI"
     },
     {
-      "admin0Name": "Iraq",
-      "admin0Pcode": "IRQ"
+      "admin0Name": "Afghanistan",
+      "admin0Pcode": "AFG"
     },
     {
-      "admin0Name": "Sudan",
-      "admin0Pcode": "SDN"
+      "admin0Name": "Chad",
+      "admin0Pcode": "TCD"
     }
   ],
   "statusCode": 200,
