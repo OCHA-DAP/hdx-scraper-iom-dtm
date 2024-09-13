@@ -7,10 +7,9 @@ from typing import List
 
 import pandas as pd
 from hdx.api.configuration import Configuration
-from hdx.utilities.retriever import Retrieve
-
 from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
+from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
 

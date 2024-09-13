@@ -9,14 +9,13 @@ import logging
 from os.path import dirname, expanduser, join
 
 from hdx.api.configuration import Configuration
+from hdx.facades.infer_arguments import facade
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import (
     script_dir_plus_file,
     wheretostart_tempdir_batch,
 )
 from hdx.utilities.retriever import Retrieve
-
-from hdx.facades.infer_arguments import facade
 
 from .dtm import Dtm
 
