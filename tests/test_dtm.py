@@ -21,10 +21,10 @@ def expected_dataset():
         "information, please see the [country-specific DTM datasets on "
         "HDX](https://data.humdata.org/dataset/?dataseries_name=IOM%20-%20DTM%20Baseline%20Assessment&dataseries_name=IOM%20-%20DTM%20Event%20and%20Flow%20Tracking&dataseries_name=IOM%20-%20DTM%20Site%20and%20Location%20Assessment&organization=international-organization-for-migration&q=&sort=last_modified%20desc&ext_page_size=25).\n",
         "data_update_frequency": 7,
-        "dataset_date": "[2010-06-30T00:00:00 TO 2024-07-31T23:59:59]",
+        "dataset_date": "[2010-11-30T00:00:00 TO 2024-06-30T23:59:59]",
         "dataset_preview": "resource_id",
-        "dataset_source": "International Organization for Migration (IOM)",
-        "groups": [{"name": "hti"}, {"name": "irq"}, {"name": "sdn"}],
+        "dataset_source": "International Organization " "for Migration (IOM)",
+        "groups": [{"name": "hti"}, {"name": "afg"}, {"name": "tcd"}],
         "license_id": "hdx-other",
         "license_other": "Copyright © International Organization for "
         "Migration 2018 "
@@ -90,8 +90,8 @@ def expected_resources():
     return [
         {
             "dataset_preview_enabled": "False",
-            "description": "Global IOM displacement tracking "
-            "matrix data at admin levels "
+            "description": "Global IOM displacement tracking matrix data "
+            "at admin levels "
             "0, 1, and 2, sourced from the DTM API",
             "format": "csv",
             "name": "Global IOM DTM data for admin levels 0-2",
@@ -100,9 +100,10 @@ def expected_resources():
         },
         {
             "dataset_preview_enabled": "True",
-            "description": "Cut down data for QuickCharts",
+            "description": "Filtered and aggregated data used to "
+            "create QuickCharts",
             "format": "csv",
-            "name": "QuickCharts-Global IOM DTM data for admin " "levels 0-2",
+            "name": "Data for QuickCharts",
             "resource_type": "file.upload",
             "url_type": "upload",
         },
@@ -160,26 +161,24 @@ class TestDtm:
                     retriever=retriever,
                     temp_dir=tempdir,
                 )
-                qc_indicators = configuration["qc_indicators"]
                 countries = dtm.get_countries()
-                dataset, bites_disabled = dtm.generate_dataset(
-                    countries=countries, qc_indicators=qc_indicators
+                operation_status = dtm.get_operation_status()
+                dataset = dtm.generate_dataset(
+                    countries=countries, operation_status=operation_status
                 )
                 dataset.update_from_yaml(
                     path=join(config_dir, "hdx_dataset_static.yaml")
                 )
                 dataset.generate_quickcharts(
-                    -1,
-                    bites_disabled=bites_disabled,
-                    indicators=qc_indicators,
+                    resource=1,
+                    path=join(config_dir, "hdx_resource_view_static.yaml"),
                 )
                 assert dataset == expected_dataset
-                assert bites_disabled == [False, False, False]
                 assert dataset.get_resources() == expected_resources
 
                 filename_list = [
                     "global-iom-dtm-from-api-admin-0-to-2.csv",
-                    "qc_global-iom-dtm-from-api-admin-0-to-2.csv",
+                    "data_for_quickcharts.csv",
                 ]
                 for filename in filename_list:
                     assert_files_same(
