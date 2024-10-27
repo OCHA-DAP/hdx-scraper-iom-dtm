@@ -30,7 +30,7 @@ def expected_dataset():
         "Migration 2018 "
         "IOM reserves the right to assert ownership of the Materials "
         "collected on the https://data.humdata.org/ "
-        "website.  \\n\\nThe Materials may be viewed, downloaded, and "
+        "website. The Materials may be viewed, downloaded, and "
         "printed for non-commercial use only, without, inter alia, "
         "any right to sell, resell, redistribute or create "
         "derivative works therefrom. At all times the User shall "
