@@ -4,9 +4,9 @@ exclude = ["_version.py"]
 [lint]
 # List of rules: https://docs.astral.sh/ruff/rules/
 select = [
-  "E",   # pycodestyle - default
-  "F",   # pyflakes - default
-  "I"    # isort
+  "E", # pycodestyle - default
+  "F", # pyflakes - default
+  "I", # isort
 ]
 
 [lint.isort]

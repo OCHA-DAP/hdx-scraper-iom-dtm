@@ -11,19 +11,12 @@ build-backend = "hatchling.build"
 [project]
 name = "hdx-scraper-dtm"
 requires-python = ">=3.12"
-dependencies = [
-  "hdx-python-api",
-  "hdx-python-utilities",
-  "pandas"
-]
+dependencies = ["hdx-python-api", "hdx-python-utilities", "pandas"]
 
 dynamic = ["version"]
 
 [project.optional-dependencies]
-test = [
-  "pytest",
-  "pytest-cov"
-]
+test = ["pytest", "pytest-cov"]
 dev = ["pre-commit"]
 
 #########
@@ -60,13 +53,15 @@ python = ["3.12"]
 
 [tool.hatch.envs.hatch-test.scripts]
 run = """
-       pytest -c .config/pytest.ini --rootdir=. --junitxml=test-results.xml \
-       --cov --cov-config=.config/coveragerc --no-cov-on-fail \
-       --cov-report=lcov --cov-report=term-missing
-       """
+    pytest -c .config/pytest.ini --rootdir=. --junitxml=test-results.xml \
+    --cov --cov-config=.config/coveragerc --no-cov-on-fail \
+    --cov-report=lcov --cov-report=term-missing
+"""
 
 [tool.hatch.envs.hatch-static-analysis.scripts]
-format-check = ["ruff format --config .config/ruff.toml --check --diff {args:.}",]
-format-fix = ["ruff format --config .config/ruff.toml {args:.}",]
-lint-check = ["ruff check --config .config/ruff.toml {args:.}",]
-lint-fix = ["ruff check --config .config/ruff.toml --fix {args:.}",]
+format-check = [
+    "ruff format --config .config/ruff.toml --check --diff {args:.}",
+]
+format-fix = ["ruff format --config .config/ruff.toml {args:.}"]
+lint-check = ["ruff check --config .config/ruff.toml {args:.}"]
+lint-fix = ["ruff check --config .config/ruff.toml --fix {args:.}"]

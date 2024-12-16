@@ -1,4 +1,5 @@
 # Collector for dtm Datasets
+
 [![Build Status](https://github.com/OCHA-DAP/hdx-scraper-dtm/actions/workflows/run-python-tests.yaml/badge.svg)](https://github.com/OCHA-DAP/hdx-scraper-dtm/actions/workflows/run-python-tests.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdx-scraper-dtm/badge.svg?branch=main&ts=1)](https://coveralls.io/github/OCHA-DAP/hdx-scraper-dtm?branch=main)
 
@@ -9,7 +10,7 @@ This script ...
 ### Environment
 
 Development is currently done using Python 3.12. We recommend using a virtual
-environment such as ``venv``:
+environment such as `venv`:
 
     python3.12 -m venv venv
     source venv/bin/activate
@@ -21,7 +22,6 @@ development by running:
 
 ### Installing and running
 
-
 For the script to run, you will need to have a file called
 .hdx_configuration.yaml in your home directory containing your HDX key, e.g.:
 
@@ -29,12 +29,12 @@ For the script to run, you will need to have a file called
     hdx_read_only: false
     hdx_site: prod
 
- You will also need to supply the universal .useragents.yaml file in your home
- directory as specified in the parameter *user_agent_config_yaml* passed to
- facade in run.py. The collector reads the key **hdx-scraper-who** as specified
- in the parameter *user_agent_lookup*.
+You will also need to supply the universal .useragents.yaml file in your home
+directory as specified in the parameter _user_agent_config_yaml_ passed to
+facade in run.py. The collector reads the key **hdx-scraper-who** as specified
+in the parameter _user_agent_lookup_.
 
- Alternatively, you can set up environment variables: `USER_AGENT`, `HDX_KEY`,
+Alternatively, you can set up environment variables: `USER_AGENT`, `HDX_KEY`,
 `HDX_SITE`, `EXTRA_PARAMS`, `TEMP_DIR`, and `LOG_FILE_ONLY`.
 
 To install and run, execute:
@@ -45,7 +45,7 @@ To install and run, execute:
 ## Environment
 
 Development is currently done using Python 3.11. We recommend using a virtual
-environment such as ``venv``:
+environment such as `venv`:
 
     python3.12 -m venv venv
     source venv/bin/activate
@@ -83,12 +83,12 @@ Ensure you have the required packages to run the tests:
 
 To run the tests and view coverage, execute:
 
-`    pytest -c .config/pytest.ini --cov hdx --cov-config .config/coveragerc
-`
+`pytest -c .config/pytest.ini --cov hdx --cov-config .config/coveragerc`
+
 ### Packages
 
 [pip-tools](https://github.com/jazzband/pip-tools) is used for
-package management.  If you’ve introduced a new package to the
+package management. If you’ve introduced a new package to the
 source code please add it to the `dependencies` section of
 `pyproject.toml` with any known version constraints.
 

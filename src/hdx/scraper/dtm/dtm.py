@@ -48,7 +48,9 @@ class Dtm:
         dataset.add_tags(self._configuration["tags"])
         # Generate a single resource for all admin levels
         global_data = []
+        adm0_data = {}
         for iso3 in countries:
+            adm0_data[iso3] = []
             for admin_level in self._configuration["admin_levels"]:
                 url = self._configuration["IDPS_URL"].format(
                     admin_level=admin_level, iso3=iso3
@@ -83,6 +85,7 @@ class Dtm:
                     )
                     continue
                 global_data += data
+                adm0_data[iso3] += data
 
         dataset.generate_resource_from_iterable(
             headers=list(self._configuration["hxl_tags"].keys()),
@@ -130,5 +133,23 @@ class Dtm:
             # Resource name and description from the config
             resourcedata=self._configuration["qc_resource_data"],
         )
+
+        for iso3 in countries:
+            admin0_name = adm0_data[iso3][0]["admin0Name"]
+            dataset.generate_resource_from_iterable(
+                headers=list(self._configuration["hxl_tags"].keys()),
+                iterable=adm0_data[iso3],
+                hxltags=self._configuration["hxl_tags"],
+                folder=self._temp_dir,
+                filename=f"{iso3}-iom-dtm-from-api-admin-0-to-2.csv",
+                # Resource name and description from the config
+                resourcedata={
+                    "name": f"{admin0_name} IOM DTM data for admin levels 0-2",
+                    "description": f"{admin0_name} IOM displacement tracking"
+                    + "matrix data at admin levels 0, 1, and 2, sourced from"
+                    + "the DTM API",
+                },
+                datecol="reportingDate",
+            )
 
         return dataset
