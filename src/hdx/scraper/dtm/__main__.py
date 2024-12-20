@@ -5,11 +5,13 @@ script then creates in HDX.
 
 """
 
+import json
 import logging
 from os.path import dirname, expanduser, join
 
 from hdx.api.configuration import Configuration
 from hdx.facades.infer_arguments import facade
+from hdx.location.country import Country
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import (
     script_dir_plus_file,
@@ -57,30 +59,49 @@ def main(
                 temp_dir=temp_dir,
             )
 
-            countries = dtm.get_countries()
+            countries_list = dtm.get_countries()
             operation_status = dtm.get_operation_status()
-            dataset = dtm.generate_dataset(
-                countries=countries, operation_status=operation_status
-            )
-            dataset.update_from_yaml(
-                path=join(
-                    dirname(__file__), "config", "hdx_dataset_static.yaml"
+            for countries in [
+                countries_list,
+                *[[x] for x in countries_list],
+            ]:
+                dataset = dtm.generate_dataset(
+                    countries=countries, operation_status=operation_status
                 )
-            )
-            dataset.generate_quickcharts(
-                resource=1,
-                path=script_dir_plus_file(
-                    join("config", "hdx_resource_view_static.yaml"),
-                    main,
-                ),
-            )
-            dataset.create_in_hdx(
-                remove_additional_resources=True,
-                match_resource_order=False,
-                hxl_update=False,
-                updated_by_script=_UPDATED_BY_SCRIPT,
-                batch=info["batch"],
-            )
+                dataset.update_from_yaml(
+                    path=join(
+                        dirname(__file__), "config", "hdx_dataset_static.yaml"
+                    )
+                )
+                resourceview = dataset.generate_quickcharts(
+                    resource=1,
+                    path=script_dir_plus_file(
+                        join("config", "hdx_resource_view_static.yaml"),
+                        main,
+                    ),
+                )
+                if len(countries) == 1:
+                    hxl_preview_config = json.loads(
+                        resourceview["hxl_preview_config"]
+                    )
+                    hxl_preview_config["bites"] = [
+                        hxl_preview_config["bites"][0]
+                    ]
+                    del hxl_preview_config["bites"][0]["ingredient"]["filters"]
+                    del hxl_preview_config["bites"][0]["hashCode"]
+                    hxl_preview_config["bites"][0]["ingredient"]["title"] = (
+                        Country.get_country_name_from_iso3(countries[0])
+                    )
+                    resourceview["hxl_preview_config"] = json.dumps(
+                        hxl_preview_config
+                    )
+                dataset.create_in_hdx(
+                    remove_additional_resources=True,
+                    match_resource_order=False,
+                    hxl_update=False,
+                    updated_by_script=_UPDATED_BY_SCRIPT,
+                    batch=info["batch"],
+                )
 
 
 if __name__ == "__main__":

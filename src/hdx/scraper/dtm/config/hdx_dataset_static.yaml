@@ -1,5 +1,3 @@
-name: global-iom-dtm-from-api
-title: Global IOM Displacement Tracking Matrix (DTM) from API
 subnational: True
 license_id: hdx-other
 license_other: >

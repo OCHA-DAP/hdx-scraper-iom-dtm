@@ -44,7 +44,7 @@ To install and run, execute:
 
 ## Environment
 
-Development is currently done using Python 3.11. We recommend using a virtual
+Development is currently done using Python 3.12. We recommend using a virtual
 environment such as `venv`:
 
     python3.12 -m venv venv

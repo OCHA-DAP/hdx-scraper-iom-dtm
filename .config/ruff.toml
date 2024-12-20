@@ -11,4 +11,10 @@ select = [
 
 [lint.isort]
 known-local-folder = ["hdx.scraper.dtm"]
-known-third-party = ["hdx.api", "hdx.utilities", "hdx.facades", "hdx.data"]
+known-third-party = [
+  "hdx.api",
+  "hdx.utilities",
+  "hdx.facades",
+  "hdx.data",
+  'hdx.location',
+]
