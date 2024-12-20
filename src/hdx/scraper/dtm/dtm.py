@@ -114,8 +114,8 @@ class Dtm:
             resourcedata={
                 "name": f"{title} IOM DTM data for admin levels 0-2",
                 "description": f"{title} IOM displacement tracking"
-                + "matrix data at admin levels 0, 1, and 2, sourced from"
-                + "the DTM API",
+                + " matrix data at admin levels 0, 1, and 2, sourced from"
+                + " the DTM API",
             },
             datecol="reportingDate",
         )
