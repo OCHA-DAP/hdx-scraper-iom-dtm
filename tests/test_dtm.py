@@ -21,7 +21,7 @@ def expected_dataset():
         "information, please see the [country-specific DTM datasets on "
         "HDX](https://data.humdata.org/dataset/?dataseries_name=IOM%20-%20DTM%20Baseline%20Assessment&dataseries_name=IOM%20-%20DTM%20Event%20and%20Flow%20Tracking&dataseries_name=IOM%20-%20DTM%20Site%20and%20Location%20Assessment&organization=international-organization-for-migration&q=&sort=last_modified%20desc&ext_page_size=25).\n",
         "data_update_frequency": 7,
-        "dataset_date": "[2017-09-30T00:00:00 TO 2024-06-30T23:59:59]",
+        "dataset_date": "[2010-11-30T00:00:00 TO 2024-06-30T23:59:59]",
         "dataset_preview": "resource_id",
         "dataset_source": "International Organization " "for Migration (IOM)",
         "groups": [{"name": "hti"}, {"name": "afg"}, {"name": "tcd"}],
