@@ -120,45 +120,46 @@ class Dtm:
             datecol="reportingDate",
         )
 
-        # Filter data for quickcharts
-        df = (
-            pd.DataFrame(countries_data)
-            # Only take admin 0, and required countries
-            .loc[
-                lambda x: x["admin1Pcode"].isna()
-                & x["admin0Pcode"].isin(
-                    self._configuration["qc_countries"]
-                    if len(countries) > 1
-                    else countries
+        if len(countries) > 1:
+            # Filter data for quickcharts
+            df = (
+                pd.DataFrame(countries_data)
+                # Only take admin 0, and required countries
+                .loc[
+                    lambda x: x["admin1Pcode"].isna()
+                    & x["admin0Pcode"].isin(
+                        self._configuration["qc_countries"]
+                        if len(countries) > 1
+                        else countries
+                    )
+                ]
+                # Then drop the extra columns
+                .drop(
+                    columns=[
+                        "admin1Name",
+                        "admin1Pcode",
+                        "admin2Name",
+                        "admin2Pcode",
+                    ],
+                    errors="ignore",
                 )
-            ]
-            # Then drop the extra columns
-            .drop(
-                columns=[
-                    "admin1Name",
-                    "admin1Pcode",
-                    "admin2Name",
-                    "admin2Pcode",
-                ],
-                errors="ignore",
+                # Take the latest numbers per country, year, and operation
+                .loc[
+                    lambda x: x.groupby(
+                        ["admin0Pcode", "operation", "yearReportingDate"]
+                    )["reportingDate"].idxmax()
+                ]
             )
-            # Take the latest numbers per country, year, and operation
-            .loc[
-                lambda x: x.groupby(
-                    ["admin0Pcode", "operation", "yearReportingDate"]
-                )["reportingDate"].idxmax()
-            ]
-        )
 
-        # Generate quickchart resource
-        dataset.generate_resource_from_iterable(
-            headers=list(df.columns),
-            iterable=df.to_dict("records"),
-            hxltags=self._configuration["hxl_tags"],
-            folder=self._temp_dir,
-            filename=self._configuration["qc_resource_filename"],
-            # Resource name and description from the config
-            resourcedata=self._configuration["qc_resource_data"],
-        )
+            # Generate quickchart resource
+            dataset.generate_resource_from_iterable(
+                headers=list(df.columns),
+                iterable=df.to_dict("records"),
+                hxltags=self._configuration["hxl_tags"],
+                folder=self._temp_dir,
+                filename=self._configuration["qc_resource_filename"],
+                # Resource name and description from the config
+                resourcedata=self._configuration["qc_resource_data"],
+            )
 
         return dataset
