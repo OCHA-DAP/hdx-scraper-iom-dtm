@@ -36,10 +36,10 @@ jobs:
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{secrets.HDX_PIPELINE_EMAIL_SERVER}}
-          server_port: ${{vars.HDX_PIPELINE_EMAIL_PORT}}
+          server_port: ${{secrets.HDX_PIPELINE_EMAIL_PORT}}
           username: ${{secrets.HDX_PIPELINE_EMAIL_USERNAME}}
           password: ${{secrets.HDX_PIPELINE_EMAIL_PASSWORD}}
           subject: "FAILED: ${{github.repository}} run job"
           body: GitHub Actions run job for ${{github.repository}} failed!
           to: ${{secrets.HDX_PIPELINE_EMAIL_LIST}}
-          from: ${{vars.HDX_PIPELINE_EMAIL_FROM}}
+          from: ${{secrets.HDX_PIPELINE_EMAIL_FROM}}
