@@ -1,5 +1,3 @@
-name: global-iom-dtm-from-api
-title: Global IOM Displacement Tracking Matrix (DTM) from API
 subnational: True
 license_id: hdx-other
 license_other: >
@@ -26,7 +24,7 @@ dataset_source: International Organization for Migration (IOM)
 package_creator: HDX Data Systems Team
 private: False
 maintainer: 80d68c27-4b7f-4865-87c6-050ebb6912ae
-owner_org:  f53d32cd-132c-4ef4-bc6d-058f94d08adf
+owner_org: f53d32cd-132c-4ef4-bc6d-058f94d08adf
 data_update_frequency: 7
 notes: >
   This dataset comes from the International Organization for Migration (IOM)'s

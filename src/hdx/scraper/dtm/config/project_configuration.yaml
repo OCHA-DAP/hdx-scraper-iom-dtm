@@ -8,12 +8,6 @@ tags:
   - forced displacement
   - hxl
   - internally displaced persons-idp
-resource_filename: global-iom-dtm-from-api-admin-0-to-2.csv
-resource_data:
-  name: Global IOM DTM data for admin levels 0-2
-  description: >-
-    Global IOM displacement tracking matrix data
-    at admin levels 0, 1, and 2, sourced from the DTM API
 qc_resource_filename: data_for_quickcharts.csv
 qc_resource_data:
   name: Data for QuickCharts

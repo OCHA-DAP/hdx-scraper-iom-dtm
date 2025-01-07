@@ -57,30 +57,35 @@ def main(
                 temp_dir=temp_dir,
             )
 
-            countries = dtm.get_countries()
+            countries_list = dtm.get_countries()
             operation_status = dtm.get_operation_status()
-            dataset = dtm.generate_dataset(
-                countries=countries, operation_status=operation_status
-            )
-            dataset.update_from_yaml(
-                path=join(
-                    dirname(__file__), "config", "hdx_dataset_static.yaml"
+            for countries in [
+                countries_list,
+                *[[x] for x in countries_list],
+            ]:
+                dataset = dtm.generate_dataset(
+                    countries=countries, operation_status=operation_status
                 )
-            )
-            dataset.generate_quickcharts(
-                resource=1,
-                path=script_dir_plus_file(
-                    join("config", "hdx_resource_view_static.yaml"),
-                    main,
-                ),
-            )
-            dataset.create_in_hdx(
-                remove_additional_resources=True,
-                match_resource_order=False,
-                hxl_update=False,
-                updated_by_script=_UPDATED_BY_SCRIPT,
-                batch=info["batch"],
-            )
+                dataset.update_from_yaml(
+                    path=join(
+                        dirname(__file__), "config", "hdx_dataset_static.yaml"
+                    )
+                )
+                if len(countries) > 1:
+                    dataset.generate_quickcharts(
+                        resource=1,
+                        path=script_dir_plus_file(
+                            join("config", "hdx_resource_view_static.yaml"),
+                            main,
+                        ),
+                    )
+                dataset.create_in_hdx(
+                    remove_additional_resources=True,
+                    match_resource_order=False,
+                    hxl_update=False,
+                    updated_by_script=_UPDATED_BY_SCRIPT,
+                    batch=info["batch"],
+                )
 
 
 if __name__ == "__main__":

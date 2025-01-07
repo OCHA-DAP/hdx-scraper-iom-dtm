@@ -9,6 +9,7 @@ import pandas as pd
 from hdx.api.configuration import Configuration
 from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
+from hdx.location.country import Country
 from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
@@ -41,94 +42,124 @@ class Dtm:
             ]
         return operation_status
 
+    def get_country_data(
+        self, iso3: str, dataset: Dataset, operation_status: defaultdict
+    ):
+        result = []
+        for admin_level in self._configuration["admin_levels"]:
+            url = self._configuration["IDPS_URL"].format(
+                admin_level=admin_level, iso3=iso3
+            )
+            # Add country to dataset
+            try:
+                dataset.add_country_location(iso3)
+            except HDXError:
+                logger.error(
+                    f"Couldn't find country {iso3} for admin "
+                    f"level {admin_level}, skipping"
+                )
+                continue
+            # Only download files once we're sure there is data
+            data = self._retriever.download_json(url=url)["result"]
+            # For each row in the data add the operation status
+            for row in data:
+                try:
+                    row["operationStatus"] = operation_status[iso3][
+                        row["operation"]
+                    ]
+                except KeyError:
+                    logger.warning(
+                        f"Operation status {iso3}:"
+                        f"{row['operation_status']} missing"
+                    )
+            # Data is empty if country is not present
+            if not data:
+                logger.warning(
+                    f"Country {iso3} has no data "
+                    f"for admin level {admin_level}"
+                )
+                continue
+            result += data
+        return result
+
     def generate_dataset(
         self, countries: List[str], operation_status: defaultdict
     ) -> Dataset:
-        dataset = Dataset()
+        name = "global" if len(countries) > 1 else countries[0].lower()
+        title = (
+            "Global"
+            if len(countries) > 1
+            else Country.get_country_name_from_iso3(countries[0])
+        )
+        dataset = Dataset(
+            {
+                "name": f"{name}-iom-dtm-from-api",
+                "title": f"{title} IOM Displacement Tracking Matrix (DTM) from"
+                + " API",
+            }
+        )
         dataset.add_tags(self._configuration["tags"])
         # Generate a single resource for all admin levels
-        global_data = []
+        countries_data = []
         for iso3 in countries:
-            for admin_level in self._configuration["admin_levels"]:
-                url = self._configuration["IDPS_URL"].format(
-                    admin_level=admin_level, iso3=iso3
-                )
-                # Add country to dataset
-                try:
-                    dataset.add_country_location(iso3)
-                except HDXError:
-                    logger.error(
-                        f"Couldn't find country {iso3} for admin "
-                        f"level {admin_level}, skipping"
-                    )
-                    continue
-                # Only download files once we're sure there is data
-                data = self._retriever.download_json(url=url)["result"]
-                # For each row in the data add the operation status
-                for row in data:
-                    try:
-                        row["operationStatus"] = operation_status[iso3][
-                            row["operation"]
-                        ]
-                    except KeyError:
-                        logger.warning(
-                            f"Operation status {iso3}:"
-                            f"{row['operation_status']} missing"
-                        )
-                # Data is empty if country is not present
-                if not data:
-                    logger.warning(
-                        f"Country {iso3} has no data "
-                        f"for admin level {admin_level}"
-                    )
-                    continue
-                global_data += data
+            data = self.get_country_data(iso3, dataset, operation_status)
+            countries_data += data
 
         dataset.generate_resource_from_iterable(
             headers=list(self._configuration["hxl_tags"].keys()),
-            iterable=global_data,
+            iterable=countries_data,
             hxltags=self._configuration["hxl_tags"],
             folder=self._temp_dir,
-            filename=self._configuration["resource_filename"],
-            # Resource name and description from the config
-            resourcedata=self._configuration["resource_data"],
+            filename=f"{name}-iom-dtm-from-api-admin-0-to-2.csv",
+            resourcedata={
+                "name": f"{title} IOM DTM data for admin levels 0-2",
+                "description": f"{title} IOM displacement tracking"
+                + " matrix data at admin levels 0, 1, and 2, sourced from"
+                + " the DTM API",
+            },
             datecol="reportingDate",
         )
 
-        # Filter data for quickcharts
-        df = (
-            pd.DataFrame(global_data)
-            # Only take admin 0, and required countries
-            .loc[
-                lambda x: x["admin1Pcode"].isna()
-                & x["admin0Pcode"].isin(self._configuration["qc_countries"])
-            ]
-            # Then drop the extra columns
-            .drop(
-                columns=[
-                    "admin1Name",
-                    "admin1Pcode",
-                    "admin2Name",
-                    "admin2Pcode",
+        if len(countries) > 1:
+            # Filter data for quickcharts
+            df = (
+                pd.DataFrame(countries_data)
+                # Only take admin 0, and required countries
+                .loc[
+                    lambda x: x["admin1Pcode"].isna()
+                    & x["admin0Pcode"].isin(
+                        self._configuration["qc_countries"]
+                        if len(countries) > 1
+                        else countries
+                    )
+                ]
+                # Then drop the extra columns
+                .drop(
+                    columns=[
+                        "admin1Name",
+                        "admin1Pcode",
+                        "admin2Name",
+                        "admin2Pcode",
+                    ],
+                    errors="ignore",
+                )
+                # Take the latest numbers per country, year, and operation
+                .loc[
+                    lambda x: x.groupby(
+                        ["admin0Pcode", "operation", "yearReportingDate"]
+                    )["reportingDate"].idxmax()
                 ]
             )
-            # Take the latest numbers per country, year, and operation
-            .loc[
-                lambda x: x.groupby(
-                    ["admin0Pcode", "operation", "yearReportingDate"]
-                )["reportingDate"].idxmax()
-            ]
-        )
 
-        # Generate quickchart resource
-        dataset.generate_resource_from_iterable(
-            headers=list(df.columns),
-            iterable=df.to_dict("records"),
-            hxltags=self._configuration["hxl_tags"],
-            folder=self._temp_dir,
-            filename=self._configuration["qc_resource_filename"],
-            # Resource name and description from the config
-            resourcedata=self._configuration["qc_resource_data"],
-        )
+            # Generate quickchart resource
+            dataset.generate_resource_from_iterable(
+                headers=list(df.columns),
+                iterable=df.to_dict("records"),
+                hxltags=self._configuration["hxl_tags"],
+                folder=self._temp_dir,
+                filename=self._configuration["qc_resource_filename"],
+                # Resource name and description from the config
+                resourcedata=self._configuration["qc_resource_data"],
+            )
 
         return dataset

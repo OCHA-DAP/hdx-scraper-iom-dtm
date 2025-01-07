@@ -168,3 +168,5 @@ saved_data/
 
 # Version file
 **/_version.py
+
+.ruff_cache

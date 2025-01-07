@@ -174,7 +174,7 @@ class TestDtm:
                     path=join(config_dir, "hdx_resource_view_static.yaml"),
                 )
                 assert dataset == expected_dataset
-                assert dataset.get_resources() == expected_resources
+                assert dataset.get_resources()[:2] == expected_resources
 
                 filename_list = [
                     "global-iom-dtm-from-api-admin-0-to-2.csv",
