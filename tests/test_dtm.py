@@ -2,6 +2,7 @@ from os.path import join
 
 import pytest
 from hdx.api.configuration import Configuration
+from hdx.data.dataset import Dataset
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
@@ -92,6 +93,69 @@ def expected_dataset():
 
 
 @pytest.fixture(scope="module")
+def expected_hapi_dataset():
+    return {
+        "name": "hdx-hapi-idps-test",
+        "title": "HDX HAPI - Affected People: Internally-Displaced Persons",
+        "groups": [{"name": "world"}],
+        "tags": [
+            {
+                "name": "conflict-violence",
+                "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
+            },
+            {
+                "name": "displacement",
+                "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
+            },
+            {
+                "name": "forced displacement",
+                "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
+            },
+            {
+                "name": "hxl",
+                "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
+            },
+            {
+                "name": "internally displaced persons-idp",
+                "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
+            },
+        ],
+        "dataset_date": "[2010-11-30T00:00:00 TO 2024-06-30T23:59:59]",
+        "subnational": True,
+        "license_id": "hdx-other",
+        "license_other": "Copyright © International Organization for "
+        "Migration 2018 "
+        "IOM reserves the right to assert ownership of the Materials "
+        "collected on the https://data.humdata.org/ "
+        "website. The Materials may be viewed, downloaded, and "
+        "printed for non-commercial use only, without, inter alia, "
+        "any right to sell, resell, redistribute or create "
+        "derivative works therefrom. At all times the User shall "
+        "credit the DTM as the source, unless otherwise stated. The "
+        "user must include the URL of the Materials from the HDX "
+        "Website, as well as the following credit line: Source: "
+        "“International Organization for Migration (IOM), "
+        "Displacement Tracking Matrix (DTM)”.\n",
+        "methodology": "Registry",
+        "caveats": "None",
+        "dataset_source": "International Organization for Migration (IOM)",
+        "package_creator": "HDX Data Systems Team",
+        "private": False,
+        "maintainer": "80d68c27-4b7f-4865-87c6-050ebb6912ae",
+        "owner_org": "hdx-hapi",
+        "data_update_frequency": 7,
+        "notes": "This dataset contains data obtained from the [HDX "
+        "Humanitarian API](https://hapi.humdata.org/) (HDX HAPI), which "
+        "provides standardized humanitarian indicators designed for "
+        "seamless interoperability from multiple sources. The data "
+        "facilitates automated workflows and visualizations to support "
+        "humanitarian decision making. For more information, please see the "
+        "HDX HAPI [landing page](https://data.humdata.org/hapi) and "
+        "[documentation](https://hdx-hapi.readthedocs.io/en/latest/).\n",
+    }
+
+
+@pytest.fixture(scope="module")
 def expected_resources():
     return [
         {
@@ -116,6 +180,22 @@ def expected_resources():
     ]
 
 
+@pytest.fixture(scope="module")
+def expected_hapi_resources():
+    return [
+        {
+            "name": "Global Affected People: Internally-Displaced Persons",
+            "description": "IDPs data from HDX HAPI, please see [the "
+            "documentation](https://hdx-hapi.readthedocs.io/en/latest/data_"
+            "usage_guides/affected_people/#internally-displaced-persons) for "
+            "more information",
+            "format": "csv",
+            "resource_type": "file.upload",
+            "url_type": "upload",
+        }
+    ]
+
+
 class TestDtm:
     @pytest.fixture(scope="function")
     def configuration(self, config_dir):
@@ -126,6 +206,22 @@ class TestDtm:
             project_config_yaml=join(config_dir, "project_configuration.yaml"),
         )
         return Configuration.read()
+
+    @pytest.fixture(scope="function")
+    def read_dataset(self, monkeypatch):
+        def read_from_hdx(dataset_name):
+            return Dataset.load_from_json(
+                join(
+                    "tests",
+                    "fixtures",
+                    "input",
+                    f"dataset-{dataset_name}.json",
+                )
+            )
+
+        monkeypatch.setattr(
+            Dataset, "read_from_hdx", staticmethod(read_from_hdx)
+        )
 
     @pytest.fixture(scope="class")
     def fixtures_dir(self):
@@ -142,11 +238,14 @@ class TestDtm:
     def test_dtm(
         self,
         configuration,
+        read_dataset,
         fixtures_dir,
         input_dir,
         config_dir,
         expected_dataset,
         expected_resources,
+        expected_hapi_dataset,
+        expected_hapi_resources,
     ):
         with temp_dir(
             "Testdtm",
@@ -191,3 +290,16 @@ class TestDtm:
                         join("tests", "fixtures", filename),
                         join(tempdir, filename),
                     )
+
+                hapi_dataset = dtm.generate_hapi_dataset(
+                    "global-iom-dtm-from-api"
+                )
+                hapi_dataset.update_from_yaml(
+                    path=join(config_dir, "hdx_hapi_dataset_static.yaml")
+                )
+                assert hapi_dataset == expected_hapi_dataset
+                assert hapi_dataset.get_resources() == expected_hapi_resources
+                assert_files_same(
+                    join("tests", "fixtures", "hdx_hapi_idps_global.csv"),
+                    join(tempdir, "hdx_hapi_idps_global.csv"),
+                )
