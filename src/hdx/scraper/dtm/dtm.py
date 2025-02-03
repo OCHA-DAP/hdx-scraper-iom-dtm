@@ -5,11 +5,13 @@ import logging
 from collections import defaultdict
 from typing import List
 
+import numpy as np
 import pandas as pd
 from hdx.api.configuration import Configuration
 from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
 from hdx.location.country import Country
+from hdx.utilities.dateparse import parse_date
 from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
@@ -22,6 +24,7 @@ class Dtm:
         self._configuration = configuration
         self._retriever = retriever
         self._temp_dir = temp_dir
+        self.global_data = []
 
     def get_countries(self) -> List[str]:
         """Get list of ISO3s to query the API with"""
@@ -105,6 +108,9 @@ class Dtm:
             data = self.get_country_data(iso3, dataset, operation_status)
             countries_data += data
 
+        if len(countries) > 1:
+            self.global_data = countries_data
+
         dataset.generate_resource_from_iterable(
             headers=list(self._configuration["hxl_tags"].keys()),
             iterable=countries_data,
@@ -161,5 +167,109 @@ class Dtm:
                 # Resource name and description from the config
                 resourcedata=self._configuration["qc_resource_data"],
             )
+
+        return dataset
+
+    def generate_hapi_dataset(self, non_hapi_dataset_name: str) -> Dataset:
+        non_hapi_dataset = Dataset.read_from_hdx(non_hapi_dataset_name)
+        dataset_id = non_hapi_dataset["id"]
+        resource_id = non_hapi_dataset.get_resource(0)["id"]
+
+        global_data = pd.DataFrame(self.global_data)
+        global_data = global_data.replace(np.nan, None)
+        global_data.rename(
+            columns={
+                "admin0Pcode": "location_code",
+                "admin1Name": "admin1_name",
+                "admin2Name": "admin2_name",
+                "admin1Pcode": "admin1_code",
+                "admin2Pcode": "admin2_code",
+                "numPresentIdpInd": "population",
+                "roundNumber": "reporting_round",
+                "assessmentType": "assessment_type",
+            },
+            inplace=True,
+        )
+
+        # Add admin_level column
+        global_data["admin_level"] = 2
+        global_data.loc[global_data["admin2_code"].isna(), "admin_level"] = 1
+        global_data.loc[global_data["admin1_code"].isna(), "admin_level"] = 0
+
+        # Add dataset metadata
+        global_data["dataset_id"] = dataset_id
+        global_data["resource_id"] = resource_id
+
+        # Check for duplicates in the data
+        subset = global_data[
+            [
+                "admin2_code",
+                "admin1_name",
+                "admin2_name",
+                "reporting_round",
+                "assessment_type",
+                "operation",
+            ]
+        ]
+        subset.loc[subset["admin2_code"].isna(), "admin2_code"] = (
+            global_data.loc[subset["admin2_code"].isna(), "admin1_code"]
+        )
+        subset.loc[subset["admin2_code"].isna(), "admin2_code"] = (
+            global_data.loc[subset["admin2_code"].isna(), "location_code"]
+        )
+        duplicates = subset.duplicated(keep=False)
+
+        # Loop through rows to get errors, HRP/GHO status, reference dates
+        errors = []
+        hrps = []
+        ghos = []
+        dates = []
+        for i in range(len(global_data)):
+            error = None
+            duplicate = duplicates[i]
+            if duplicate is np.True_:
+                error = "Duplicate row"
+            errors.append(error)
+
+            # Get HRP and GHO status
+            hrp = Country.get_hrp_status_from_iso3(
+                global_data["location_code"][i]
+            )
+            gho = Country.get_gho_status_from_iso3(
+                global_data["location_code"][i]
+            )
+            hrps.append(hrp)
+            ghos.append(gho)
+
+            # Parse date
+            date = parse_date(global_data["reportingDate"][i])
+            dates.append(date)
+
+        global_data["error"] = errors
+        global_data["has_hrp"] = hrps
+        global_data["in_gho"] = ghos
+        global_data["reference_period_start"] = dates
+        global_data["reference_period_end"] = dates
+
+        # Generate dataset
+        dataset = Dataset(
+            {
+                "name": "hdx-hapi-idps-test",
+                "title": "HDX HAPI - Affected People: "
+                + "Internally-Displaced Persons",
+            }
+        )
+        dataset.add_other_location("world")
+        dataset.add_tags(self._configuration["tags"])
+        hxl_tags = self._configuration["hapi_hxl_tags"]
+        dataset.generate_resource_from_iterable(
+            headers=list(hxl_tags.keys()),
+            iterable=global_data.to_dict("records"),
+            hxltags=hxl_tags,
+            folder=self._temp_dir,
+            filename="hdx_hapi_idps_global.csv",
+            resourcedata=self._configuration["hapi_resource_data"],
+            datecol="reportingDate",
+        )
 
         return dataset

@@ -86,6 +86,22 @@ def main(
                     updated_by_script=_UPDATED_BY_SCRIPT,
                     batch=info["batch"],
                 )
+                if len(countries) > 1:
+                    hapi_dataset = dtm.generate_hapi_dataset(dataset["name"])
+                    hapi_dataset.update_from_yaml(
+                        path=join(
+                            dirname(__file__),
+                            "config",
+                            "hdx_hapi_dataset_static.yaml",
+                        )
+                    )
+                    hapi_dataset.create_in_hdx(
+                        remove_additional_resources=True,
+                        match_resource_order=False,
+                        hxl_update=False,
+                        updated_by_script=_UPDATED_BY_SCRIPT,
+                        batch=info["batch"],
+                    )
 
 
 if __name__ == "__main__":
