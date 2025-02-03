@@ -14,13 +14,17 @@ from hdx.scraper.dtm.dtm import Dtm
 @pytest.fixture(scope="module")
 def expected_dataset():
     return {
-        "caveats": 'This dataset comes from the [DTM '
-        'API](https://dtm.iom.int/data-and-analysis/dtm-api), which '
-        'provides only non-sensitive IDP figures, aggregated at the '
-        'country, Admin 1, and Admin 2 levels. For more detailed '
-        'information, please see the [country-specific DTM datasets on '
-        'HDX](https://data.humdata.org/dataset/?dataseries_name=IOM%20-%20DTM%20Baseline%20Assessment&dataseries_name=IOM%20-%20DTM%20Event%20and%20Flow%20Tracking&dataseries_name=IOM%20-%20DTM%20Site%20and%20Location%20Assessment&organization=international-organization-for-migration&q=&sort=last_modified%20desc&ext_page_size=25). '
-        'IOM is continually adding new data as well as updating data '
+        "caveats": "This dataset comes from the [DTM "
+        "API](https://dtm.iom.int/data-and-analysis/dtm-api), which "
+        "provides only non-sensitive IDP figures, aggregated at the "
+        "country, Admin 1, and Admin 2 levels. For more detailed "
+        "information, please see the [country-specific DTM datasets on "
+        "HDX](https://data.humdata.org/dataset/?dataseries_name=IOM%20-%20DTM"
+        "%20Baseline%20Assessment&dataseries_name=IOM%20-%20DTM%20Event%20and"
+        "%20Flow%20Tracking&dataseries_name=IOM%20-%20DTM%20Site%20and%20"
+        "Location%20Assessment&organization=international-organization-for-"
+        "migration&q=&sort=last_modified%20desc&ext_page_size=25). "
+        "IOM is continually adding new data as well as updating data "
         "that's already been added.\n",
         "data_update_frequency": 7,
         "dataset_date": "[2010-11-30T00:00:00 TO 2024-06-30T23:59:59]",
