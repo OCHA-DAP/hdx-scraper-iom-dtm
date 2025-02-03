@@ -170,3 +170,6 @@ saved_data/
 **/_version.py
 
 .ruff_cache
+
+# Mac files
+.DS_Store
