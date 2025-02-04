@@ -2,6 +2,7 @@ from os.path import join
 
 import pytest
 from hdx.api.configuration import Configuration
+from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.dataset import Dataset
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import Download
@@ -137,7 +138,7 @@ def expected_hapi_dataset():
         "“International Organization for Migration (IOM), "
         "Displacement Tracking Matrix (DTM)”.\n",
         "methodology": "Registry",
-        "caveats": "None",
+        "caveats": "",
         "dataset_source": "International Organization for Migration (IOM)",
         "package_creator": "HDX Data Systems Team",
         "private": False,
@@ -160,8 +161,7 @@ def expected_resources():
     return [
         {
             "dataset_preview_enabled": "False",
-            "description": "Global IOM displacement tracking matrix data "
-            "at admin levels "
+            "description": "Global IOM displacement tracking matrix data at admin levels "
             "0, 1, and 2, sourced from the DTM API",
             "format": "csv",
             "name": "Global IOM DTM data for admin levels 0-2",
@@ -170,8 +170,7 @@ def expected_resources():
         },
         {
             "dataset_preview_enabled": "True",
-            "description": "Filtered and aggregated data used to "
-            "create QuickCharts",
+            "description": "Filtered and aggregated data used to create QuickCharts",
             "format": "csv",
             "name": "Data for QuickCharts",
             "resource_type": "file.upload",
@@ -219,9 +218,7 @@ class TestDtm:
                 )
             )
 
-        monkeypatch.setattr(
-            Dataset, "read_from_hdx", staticmethod(read_from_hdx)
-        )
+        monkeypatch.setattr(Dataset, "read_from_hdx", staticmethod(read_from_hdx))
 
     @pytest.fixture(scope="class")
     def fixtures_dir(self):
@@ -247,59 +244,59 @@ class TestDtm:
         expected_hapi_dataset,
         expected_hapi_resources,
     ):
-        with temp_dir(
-            "Testdtm",
-            delete_on_success=True,
-            delete_on_failure=False,
-        ) as tempdir:
-            with Download(user_agent="test") as downloader:
-                retriever = Retrieve(
-                    downloader=downloader,
-                    fallback_dir=tempdir,
-                    saved_dir=input_dir,
-                    temp_dir=tempdir,
-                    save=False,
-                    use_saved=True,
-                )
-                dtm = Dtm(
-                    configuration=configuration,
-                    retriever=retriever,
-                    temp_dir=tempdir,
-                )
-                countries = dtm.get_countries()
-                operation_status = dtm.get_operation_status()
-                dataset = dtm.generate_dataset(
-                    countries=countries, operation_status=operation_status
-                )
-                dataset.update_from_yaml(
-                    path=join(config_dir, "hdx_dataset_static.yaml")
-                )
-                dataset.generate_quickcharts(
-                    resource=1,
-                    path=join(config_dir, "hdx_resource_view_static.yaml"),
-                )
-                assert dataset == expected_dataset
-                assert dataset.get_resources()[:2] == expected_resources
-
-                filename_list = [
-                    "global-iom-dtm-from-api-admin-0-to-2.csv",
-                    "data_for_quickcharts.csv",
-                ]
-                for filename in filename_list:
-                    assert_files_same(
-                        join("tests", "fixtures", filename),
-                        join(tempdir, filename),
+        with HDXErrorHandler() as error_handler:
+            with temp_dir(
+                "Testdtm",
+                delete_on_success=True,
+                delete_on_failure=False,
+            ) as tempdir:
+                with Download(user_agent="test") as downloader:
+                    retriever = Retrieve(
+                        downloader=downloader,
+                        fallback_dir=tempdir,
+                        saved_dir=input_dir,
+                        temp_dir=tempdir,
+                        save=False,
+                        use_saved=True,
                     )
+                    dtm = Dtm(
+                        configuration=configuration,
+                        retriever=retriever,
+                        temp_dir=tempdir,
+                        error_handler=error_handler,
+                    )
+                    countries = dtm.get_countries()
+                    operation_status = dtm.get_operation_status()
+                    dataset = dtm.generate_dataset(
+                        countries=countries, operation_status=operation_status
+                    )
+                    dataset.update_from_yaml(
+                        path=join(config_dir, "hdx_dataset_static.yaml")
+                    )
+                    dataset.generate_quickcharts(
+                        resource=1,
+                        path=join(config_dir, "hdx_resource_view_static.yaml"),
+                    )
+                    assert dataset == expected_dataset
+                    assert dataset.get_resources()[:2] == expected_resources
 
-                hapi_dataset = dtm.generate_hapi_dataset(
-                    "global-iom-dtm-from-api"
-                )
-                hapi_dataset.update_from_yaml(
-                    path=join(config_dir, "hdx_hapi_dataset_static.yaml")
-                )
-                assert hapi_dataset == expected_hapi_dataset
-                assert hapi_dataset.get_resources() == expected_hapi_resources
-                assert_files_same(
-                    join("tests", "fixtures", "hdx_hapi_idps_global.csv"),
-                    join(tempdir, "hdx_hapi_idps_global.csv"),
-                )
+                    filename_list = [
+                        "global-iom-dtm-from-api-admin-0-to-2.csv",
+                        "data_for_quickcharts.csv",
+                    ]
+                    for filename in filename_list:
+                        assert_files_same(
+                            join("tests", "fixtures", filename),
+                            join(tempdir, filename),
+                        )
+
+                    hapi_dataset = dtm.generate_hapi_dataset("global-iom-dtm-from-api")
+                    hapi_dataset.update_from_yaml(
+                        path=join(config_dir, "hdx_hapi_dataset_static.yaml")
+                    )
+                    assert hapi_dataset == expected_hapi_dataset
+                    assert hapi_dataset.get_resources() == expected_hapi_resources
+                    assert_files_same(
+                        join("tests", "fixtures", "hdx_hapi_idps_global.csv"),
+                        join(tempdir, "hdx_hapi_idps_global.csv"),
+                    )

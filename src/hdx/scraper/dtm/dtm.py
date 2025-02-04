@@ -8,8 +8,10 @@ from typing import List
 import numpy as np
 import pandas as pd
 from hdx.api.configuration import Configuration
+from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
+from hdx.location.adminlevel import AdminLevel
 from hdx.location.country import Country
 from hdx.utilities.dateparse import parse_date
 from hdx.utilities.retriever import Retrieve
@@ -19,18 +21,24 @@ logger = logging.getLogger(__name__)
 
 class Dtm:
     def __init__(
-        self, configuration: Configuration, retriever: Retrieve, temp_dir: str
+        self,
+        configuration: Configuration,
+        retriever: Retrieve,
+        temp_dir: str,
+        error_handler: HDXErrorHandler,
     ):
         self._configuration = configuration
         self._retriever = retriever
         self._temp_dir = temp_dir
+        self._admins = []
+        self._error_handler = error_handler
         self.global_data = []
 
     def get_countries(self) -> List[str]:
         """Get list of ISO3s to query the API with"""
-        data = self._retriever.download_json(
-            url=self._configuration["COUNTRIES_URL"]
-        )["result"]
+        data = self._retriever.download_json(url=self._configuration["COUNTRIES_URL"])[
+            "result"
+        ]
         countries = [country_dict["admin0Pcode"] for country_dict in data]
         return countries
 
@@ -67,19 +75,15 @@ class Dtm:
             # For each row in the data add the operation status
             for row in data:
                 try:
-                    row["operationStatus"] = operation_status[iso3][
-                        row["operation"]
-                    ]
+                    row["operationStatus"] = operation_status[iso3][row["operation"]]
                 except KeyError:
                     logger.warning(
-                        f"Operation status {iso3}:"
-                        f"{row['operation_status']} missing"
+                        f"Operation status {iso3}:" f"{row['operation_status']} missing"
                     )
             # Data is empty if country is not present
             if not data:
                 logger.warning(
-                    f"Country {iso3} has no data "
-                    f"for admin level {admin_level}"
+                    f"Country {iso3} has no data " f"for admin level {admin_level}"
                 )
                 continue
             result += data
@@ -97,8 +101,7 @@ class Dtm:
         dataset = Dataset(
             {
                 "name": f"{name}-iom-dtm-from-api",
-                "title": f"{title} IOM Displacement Tracking Matrix (DTM) from"
-                + " API",
+                "title": f"{title} IOM Displacement Tracking Matrix (DTM) from API",
             }
         )
         dataset.add_tags(self._configuration["tags"])
@@ -119,9 +122,8 @@ class Dtm:
             filename=f"{name}-iom-dtm-from-api-admin-0-to-2.csv",
             resourcedata={
                 "name": f"{title} IOM DTM data for admin levels 0-2",
-                "description": f"{title} IOM displacement tracking"
-                + " matrix data at admin levels 0, 1, and 2, sourced from"
-                + " the DTM API",
+                "description": f"{title} IOM displacement tracking matrix data at admin "
+                f"levels 0, 1, and 2, sourced from the DTM API",
             },
             datecol="reportingDate",
         )
@@ -170,20 +172,29 @@ class Dtm:
 
         return dataset
 
+    def get_pcodes(self) -> None:
+        for admin_level in [1, 2]:
+            admin = AdminLevel(admin_level=admin_level, retriever=self._retriever)
+            dataset = admin.get_libhxl_dataset(retriever=self._retriever)
+            admin.setup_from_libhxl_dataset(dataset)
+            admin.load_pcode_formats()
+            self._admins.append(admin)
+
     def generate_hapi_dataset(self, non_hapi_dataset_name: str) -> Dataset:
+        # Set up admin levels and p-codes
+        self.get_pcodes()
+
         non_hapi_dataset = Dataset.read_from_hdx(non_hapi_dataset_name)
         dataset_id = non_hapi_dataset["id"]
         resource_id = non_hapi_dataset.get_resource(0)["id"]
 
         global_data = pd.DataFrame(self.global_data)
-        global_data = global_data.replace(np.nan, None)
+        global_data.replace(np.nan, None, inplace=True)
         global_data.rename(
             columns={
                 "admin0Pcode": "location_code",
-                "admin1Name": "admin1_name",
-                "admin2Name": "admin2_name",
-                "admin1Pcode": "admin1_code",
-                "admin2Pcode": "admin2_code",
+                "admin1Name": "provider_admin1_name",
+                "admin2Name": "provider_admin2_name",
                 "numPresentIdpInd": "population",
                 "roundNumber": "reporting_round",
                 "assessmentType": "assessment_type",
@@ -193,8 +204,8 @@ class Dtm:
 
         # Add admin_level column
         global_data["admin_level"] = 2
-        global_data.loc[global_data["admin2_code"].isna(), "admin_level"] = 1
-        global_data.loc[global_data["admin1_code"].isna(), "admin_level"] = 0
+        global_data.loc[global_data["admin2Pcode"].isna(), "admin_level"] = 1
+        global_data.loc[global_data["admin1Pcode"].isna(), "admin_level"] = 0
 
         # Add dataset metadata
         global_data["dataset_id"] = dataset_id
@@ -203,60 +214,99 @@ class Dtm:
         # Check for duplicates in the data
         subset = global_data[
             [
-                "admin2_code",
-                "admin1_name",
-                "admin2_name",
+                "admin2Pcode",
+                "provider_admin1_name",
+                "provider_admin2_name",
                 "reporting_round",
                 "assessment_type",
                 "operation",
             ]
         ]
-        subset.loc[subset["admin2_code"].isna(), "admin2_code"] = (
-            global_data.loc[subset["admin2_code"].isna(), "admin1_code"]
-        )
-        subset.loc[subset["admin2_code"].isna(), "admin2_code"] = (
-            global_data.loc[subset["admin2_code"].isna(), "location_code"]
-        )
+        subset.loc[subset["admin2Pcode"].isna(), "admin2Pcode"] = global_data.loc[
+            subset["admin2Pcode"].isna(), "admin1Pcode"
+        ]
+        subset.loc[subset["admin2Pcode"].isna(), "admin2Pcode"] = global_data.loc[
+            subset["admin2Pcode"].isna(), "location_code"
+        ]
         duplicates = subset.duplicated(keep=False)
+        global_data["error"] = None
+        global_data.loc[duplicates, "error"] = "Duplicate row"
+        if sum(duplicates) > 0:
+            self._error_handler.add_message(
+                "DTM",
+                non_hapi_dataset_name,
+                f"{sum(duplicates)} duplicates found",
+            )
 
-        # Loop through rows to get errors, HRP/GHO status, reference dates
-        errors = []
-        hrps = []
-        ghos = []
-        dates = []
-        for i in range(len(global_data)):
-            error = None
-            duplicate = duplicates[i]
-            if duplicate is np.True_:
-                error = "Duplicate row"
-            errors.append(error)
+        # Loop through rows to check pcodes, get HRP/GHO status and dates
+        global_data["has_hrp"] = None
+        global_data["in_gho"] = None
+        global_data["reference_period_start"] = None
+        global_data["reference_period_end"] = None
+        global_data["admin1_code"] = None
+        global_data["admin2_code"] = None
+        global_data["admin1_name"] = None
+        global_data["admin2_name"] = None
 
+        global_data = global_data.to_dict("records")
+        for row in global_data:
             # Get HRP and GHO status
-            hrp = Country.get_hrp_status_from_iso3(
-                global_data["location_code"][i]
-            )
-            gho = Country.get_gho_status_from_iso3(
-                global_data["location_code"][i]
-            )
-            hrps.append(hrp)
-            ghos.append(gho)
+            country_iso = row["location_code"]
+            hrp = Country.get_hrp_status_from_iso3(country_iso)
+            gho = Country.get_gho_status_from_iso3(country_iso)
+            row["has_hrp"] = hrp
+            row["in_gho"] = gho
 
             # Parse date
-            date = parse_date(global_data["reportingDate"][i])
-            dates.append(date)
+            date = parse_date(row["reportingDate"])
+            row["reference_period_start"] = date
+            row["reference_period_end"] = date
 
-        global_data["error"] = errors
-        global_data["has_hrp"] = hrps
-        global_data["in_gho"] = ghos
-        global_data["reference_period_start"] = dates
-        global_data["reference_period_end"] = dates
+            # Check p-code
+            admin_level = row["admin_level"]
+            if admin_level == 0:
+                continue
+            if admin_level == 1:
+                pcode = row["admin1Pcode"]
+                admin_name = row["provider_admin1_name"]
+                if pcode not in self._admins[0].pcodes:
+                    pcode, _ = self._admins[0].get_pcode(country_iso, admin_name)
+                row["admin1_code"] = pcode
+                if pcode:
+                    admin1_name = self._admins[0].pcode_to_name.get(pcode)
+                    row["admin1_name"] = admin1_name
+            if admin_level == 2:
+                pcode = row["admin2Pcode"]
+                admin_name = row["provider_admin2_name"]
+                if pcode not in self._admins[1].pcodes:
+                    admin1_pcode = row["admin1Pcode"]
+                    if admin1_pcode not in self._admins[0].pcodes:
+                        admin1_name = row["provider_admin1_name"]
+                        admin1_pcode, _ = self._admins[0].get_pcode(
+                            country_iso, admin1_name
+                        )
+                    pcode, _ = self._admins[1].get_pcode(
+                        country_iso, admin_name, parent=admin1_pcode
+                    )
+                if pcode:
+                    admin1_pcode = self._admins[1].pcode_to_parent.get(pcode)
+                    row["admin2_code"] = pcode
+                    row["admin2_name"] = self._admins[1].pcode_to_name.get(pcode)
+                    row["admin1_code"] = admin1_pcode
+                    row["admin1_name"] = self._admins[0].pcode_to_name.get(admin1_pcode)
+            if not pcode:
+                self._error_handler.add_missing_value_message(
+                    "ACLED",
+                    non_hapi_dataset_name,
+                    f"admin {admin_level} pcode",
+                    admin_name,
+                )
 
         # Generate dataset
         dataset = Dataset(
             {
                 "name": "hdx-hapi-idps-test",
-                "title": "HDX HAPI - Affected People: "
-                + "Internally-Displaced Persons",
+                "title": "HDX HAPI - Affected People: Internally-Displaced Persons",
             }
         )
         dataset.add_other_location("world")
@@ -264,12 +314,13 @@ class Dtm:
         hxl_tags = self._configuration["hapi_hxl_tags"]
         dataset.generate_resource_from_iterable(
             headers=list(hxl_tags.keys()),
-            iterable=global_data.to_dict("records"),
+            iterable=global_data,
             hxltags=hxl_tags,
             folder=self._temp_dir,
             filename="hdx_hapi_idps_global.csv",
             resourcedata=self._configuration["hapi_resource_data"],
             datecol="reportingDate",
+            encoding="utf-8-sig",
         )
 
         return dataset
