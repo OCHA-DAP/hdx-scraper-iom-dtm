@@ -37,6 +37,7 @@ hxl_tags:
   admin1Pcode: "#adm1+code"
   admin2Name: "#adm2+name"
   admin2Pcode: "#adm2+code"
+  adminLevel: "#adm+level"
   numPresentIdpInd: "#affected+idps"
   reportingDate: "#date+reported"
   yearReportingDate: "#date+year+reported"

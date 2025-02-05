@@ -72,7 +72,7 @@ class Dtm:
                 continue
             # Only download files once we're sure there is data
             data = self._retriever.download_json(url=url)["result"]
-            # For each row in the data add the operation status
+            # For each row in the data add the operation status and admin level
             for row in data:
                 try:
                     row["operationStatus"] = operation_status[iso3][row["operation"]]
@@ -80,6 +80,7 @@ class Dtm:
                     logger.warning(
                         f"Operation status {iso3}:" f"{row['operation_status']} missing"
                     )
+                row["adminLevel"] = admin_level
             # Data is empty if country is not present
             if not data:
                 logger.warning(
@@ -148,6 +149,7 @@ class Dtm:
                         "admin1Pcode",
                         "admin2Name",
                         "admin2Pcode",
+                        "adminLevel",
                     ],
                     errors="ignore",
                 )
@@ -198,14 +200,10 @@ class Dtm:
                 "numPresentIdpInd": "population",
                 "roundNumber": "reporting_round",
                 "assessmentType": "assessment_type",
+                "adminLevel": "admin_level",
             },
             inplace=True,
         )
-
-        # Add admin_level column
-        global_data["admin_level"] = 2
-        global_data.loc[global_data["admin2Pcode"].isna(), "admin_level"] = 1
-        global_data.loc[global_data["admin1Pcode"].isna(), "admin_level"] = 0
 
         # Add dataset metadata
         global_data["dataset_id"] = dataset_id
@@ -220,13 +218,14 @@ class Dtm:
                 "reporting_round",
                 "assessment_type",
                 "operation",
+                "reportingDate",
             ]
         ]
-        subset.loc[subset["admin2Pcode"].isna(), "admin2Pcode"] = global_data.loc[
-            subset["admin2Pcode"].isna(), "admin1Pcode"
+        subset.loc[global_data["admin_level"] == 1, "admin2Pcode"] = global_data.loc[
+            global_data["admin_level"] == 1, "admin1Pcode"
         ]
-        subset.loc[subset["admin2Pcode"].isna(), "admin2Pcode"] = global_data.loc[
-            subset["admin2Pcode"].isna(), "location_code"
+        subset.loc[global_data["admin_level"] == 0, "admin2Pcode"] = global_data.loc[
+            global_data["admin_level"] == 0, "location_code"
         ]
         duplicates = subset.duplicated(keep=False)
         global_data["error"] = None
@@ -278,7 +277,7 @@ class Dtm:
             if admin_level == 2:
                 pcode = row["admin2Pcode"]
                 admin_name = row["provider_admin2_name"]
-                if pcode not in self._admins[1].pcodes:
+                if pcode and pcode not in self._admins[1].pcodes:
                     admin1_pcode = row["admin1Pcode"]
                     if admin1_pcode not in self._admins[0].pcodes:
                         admin1_name = row["provider_admin1_name"]
