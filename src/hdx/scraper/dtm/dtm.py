@@ -3,7 +3,7 @@
 
 import logging
 from collections import defaultdict
-from typing import List
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -182,6 +182,80 @@ class Dtm:
             admin.load_pcode_formats()
             self._admins.append(admin)
 
+    def get_admin_info(
+        self,
+        dataset_name: str,
+        iso: str,
+        admin_level: int,
+        pcode: str,
+        admin_name: str,
+        parent_pcode: Optional[str] = None,
+        parent_name: Optional[str] = None,
+    ) -> Tuple[Dict[str, str], Optional[str]]:
+        admin_info = {
+            "admin2_code": None,
+            "admin2_name": None,
+            "admin1_code": None,
+            "admin1_name": None,
+        }
+        warning = None
+
+        if not pcode:
+            self._error_handler.add_missing_value_message(
+                "DTM",
+                dataset_name,
+                f"admin {admin_level} pcode",
+                pcode,
+            )
+            warning = "Missing pcode!"
+            return admin_info, warning
+
+        if pcode not in self._admins[admin_level - 1].pcodes:
+            try:
+                matched_pcode = self._admins[admin_level - 1].convert_admin_pcode_length(
+                    iso, pcode, parent=parent_pcode
+                )
+            except IndexError:
+                matched_pcode = None
+            if matched_pcode:
+                pcode = matched_pcode
+            else:
+                self._error_handler.add_missing_value_message(
+                    "DTM",
+                    dataset_name,
+                    f"admin {admin_level} pcode",
+                    pcode,
+                )
+                warning = f"Unknown pcode {pcode}!"
+                if parent_name:
+                    parent_pcode, _ = self._admins[admin_level - 2].get_pcode(
+                        iso, parent_name
+                    )
+                matched_pcode, _ = self._admins[admin_level - 1].get_pcode(
+                    iso, admin_name, parent=parent_pcode
+                )
+                if matched_pcode:
+                    pcode = matched_pcode
+                if not matched_pcode:
+                    self._error_handler.add_missing_value_message(
+                        "DTM",
+                        dataset_name,
+                        f"admin {admin_level} pcode",
+                        pcode,
+                    )
+                    warning = f"Unknown pcode {pcode}!"
+                    return admin_info, warning
+
+        admin_info[f"admin{admin_level}_code"] = pcode
+        admin_info[f"admin{admin_level}_name"] = self._admins[
+            admin_level - 1
+        ].pcode_to_name.get(pcode)
+        if admin_level == 2:
+            admin1_code = self._admins[1].pcode_to_parent.get(pcode)
+            admin_info["admin1_code"] = admin1_code
+            admin_info["admin1_name"] = self._admins[0].pcode_to_name.get(admin1_code)
+        return admin_info, warning
+
     def generate_hapi_dataset(self, non_hapi_dataset_name: str) -> Dataset:
         # Set up admin levels and p-codes
         self.get_pcodes()
@@ -246,6 +320,7 @@ class Dtm:
         global_data["admin2_code"] = None
         global_data["admin1_name"] = None
         global_data["admin2_name"] = None
+        global_data["warning"] = None
 
         global_data = global_data.to_dict("records")
         for row in global_data:
@@ -265,41 +340,27 @@ class Dtm:
             admin_level = row["admin_level"]
             if admin_level == 0:
                 continue
-            if admin_level == 1:
-                pcode = row["admin1Pcode"]
-                admin_name = row["provider_admin1_name"]
-                if pcode not in self._admins[0].pcodes:
-                    pcode, _ = self._admins[0].get_pcode(country_iso, admin_name)
-                row["admin1_code"] = pcode
-                if pcode:
-                    admin1_name = self._admins[0].pcode_to_name.get(pcode)
-                    row["admin1_name"] = admin1_name
+            pcode = row[f"admin{admin_level}Pcode"]
+            admin_name = row[f"provider_admin{admin_level}_name"]
+            parent_pcode = None
+            parent_name = None
             if admin_level == 2:
-                pcode = row["admin2Pcode"]
-                admin_name = row["provider_admin2_name"]
-                if pcode and pcode not in self._admins[1].pcodes:
-                    admin1_pcode = row["admin1Pcode"]
-                    if admin1_pcode not in self._admins[0].pcodes:
-                        admin1_name = row["provider_admin1_name"]
-                        admin1_pcode, _ = self._admins[0].get_pcode(
-                            country_iso, admin1_name
-                        )
-                    pcode, _ = self._admins[1].get_pcode(
-                        country_iso, admin_name, parent=admin1_pcode
-                    )
-                if pcode:
-                    admin1_pcode = self._admins[1].pcode_to_parent.get(pcode)
-                    row["admin2_code"] = pcode
-                    row["admin2_name"] = self._admins[1].pcode_to_name.get(pcode)
-                    row["admin1_code"] = admin1_pcode
-                    row["admin1_name"] = self._admins[0].pcode_to_name.get(admin1_pcode)
-            if not pcode:
-                self._error_handler.add_missing_value_message(
-                    "DTM",
-                    non_hapi_dataset_name,
-                    f"admin {admin_level} pcode",
-                    admin_name,
-                )
+                parent_pcode = row[f"admin{admin_level - 1}Pcode"]
+                parent_name = row[f"provider_admin{admin_level - 1}_name"]
+            admin_info, warning = self.get_admin_info(
+                non_hapi_dataset_name,
+                country_iso,
+                admin_level,
+                pcode,
+                admin_name,
+                parent_pcode,
+                parent_name,
+            )
+            row["admin1_code"] = admin_info["admin1_code"]
+            row["admin1_name"] = admin_info["admin1_name"]
+            row["admin2_code"] = admin_info["admin2_code"]
+            row["admin2_name"] = admin_info["admin2_name"]
+            row["warning"] = warning
 
         # Generate dataset
         dataset = Dataset(

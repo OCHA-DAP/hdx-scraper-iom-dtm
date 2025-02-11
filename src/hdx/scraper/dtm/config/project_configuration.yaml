@@ -69,4 +69,5 @@ hapi_hxl_tags:
   reference_period_end: "#date+end"
   dataset_id: "#meta+dataset_id"
   resource_id: "#meta+resource_id"
-  error: "#error"
+  warning: "#meta+warning"
+  error: "#meta+error"
