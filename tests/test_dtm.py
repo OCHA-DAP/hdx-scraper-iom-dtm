@@ -96,7 +96,7 @@ def expected_dataset():
 @pytest.fixture(scope="module")
 def expected_hapi_dataset():
     return {
-        "name": "hdx-hapi-idps-test",
+        "name": "hdx-hapi-idps",
         "title": "HDX HAPI - Affected People: Internally-Displaced Persons",
         "groups": [{"name": "world"}],
         "tags": [

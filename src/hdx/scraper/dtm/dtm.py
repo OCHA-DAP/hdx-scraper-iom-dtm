@@ -365,7 +365,7 @@ class Dtm:
         # Generate dataset
         dataset = Dataset(
             {
-                "name": "hdx-hapi-idps-test",
+                "name": "hdx-hapi-idps",
                 "title": "HDX HAPI - Affected People: Internally-Displaced Persons",
             }
         )
