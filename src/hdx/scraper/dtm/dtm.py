@@ -328,6 +328,8 @@ class Dtm:
             country_iso = row["location_code"]
             hrp = Country.get_hrp_status_from_iso3(country_iso)
             gho = Country.get_gho_status_from_iso3(country_iso)
+            hrp = "Y" if hrp else "N"
+            gho = "Y" if gho else "N"
             row["has_hrp"] = hrp
             row["in_gho"] = gho
 
