@@ -280,8 +280,8 @@ class Dtm:
         )
 
         # Add dataset metadata
-        global_data["dataset_id"] = dataset_id
-        global_data["resource_id"] = resource_id
+        global_data["dataset_hdx_id"] = dataset_id
+        global_data["resource_hdx_id"] = resource_id
 
         # Check for duplicates in the data
         subset = global_data[

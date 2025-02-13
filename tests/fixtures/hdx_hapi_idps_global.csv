@@ -1,4 +1,4 @@
-﻿location_code,has_hrp,in_gho,provider_admin1_name,provider_admin2_name,admin1_code,admin1_name,admin2_code,admin2_name,admin_level,operation,assessment_type,population,reporting_round,reference_period_start,reference_period_end,dataset_id,resource_id,warning,error
+﻿location_code,has_hrp,in_gho,provider_admin1_name,provider_admin2_name,admin1_code,admin1_name,admin2_code,admin2_name,admin_level,operation,assessment_type,population,reporting_round,reference_period_start,reference_period_end,dataset_hdx_id,resource_hdx_id,warning,error
 #country+code,#meta+has_hrp,#meta+in_gho,#adm1+name+provider,#adm2+name+provider,#adm1+code,#adm1+name,#adm2+code,#adm2+name,#adm+level,#operation+name,#assessment+type,#affected+idps,#round+code,#date+start,#date+end,#meta+dataset_id,#meta+resource_id,#meta+warning,#meta+error
 HTI,Y,Y,,,,,,,0,Haiti Earthquake,SA,1068882,1,2010-11-30 00:00:00+00:00,2010-11-30 00:00:00+00:00,32d0365c-d513-4721-8d66-1b19b12c4b08,80911e9b-7527-469a-a545-4074860e1288,,
 HTI,Y,Y,,,,,,,0,Haiti Earthquake,SA,806377,2,2011-01-30 00:00:00+00:00,2011-01-30 00:00:00+00:00,32d0365c-d513-4721-8d66-1b19b12c4b08,80911e9b-7527-469a-a545-4074860e1288,,
