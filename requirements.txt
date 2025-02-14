@@ -34,7 +34,7 @@ et-xmlfile==2.0.0
     # via openpyxl
 frictionless==5.18.0
     # via hdx-python-utilities
-hdx-python-api==6.3.7
+hdx-python-api==6.3.8
     # via hdx-scraper-dtm (pyproject.toml)
 hdx-python-country==3.8.8
     # via
@@ -45,7 +45,7 @@ hdx-python-utilities==3.8.3
     #   hdx-scraper-dtm (pyproject.toml)
     #   hdx-python-api
     #   hdx-python-country
-humanize==4.11.0
+humanize==4.12.0
     # via frictionless
 idna==3.10
     # via
@@ -89,7 +89,7 @@ more-itertools==10.6.0
     # via inflect
 num2words==0.5.14
     # via quantulum3
-numpy==2.2.2
+numpy==2.2.3
     # via pandas
 openpyxl==3.1.5
     # via hdx-python-utilities

@@ -207,7 +207,7 @@ class Dtm:
                 f"admin {admin_level} pcode",
                 pcode,
             )
-            warning = "Missing pcode!"
+            warning = "Missing pcode"
             return admin_info, warning
 
         if pcode not in self._admins[admin_level - 1].pcodes:
@@ -218,6 +218,7 @@ class Dtm:
             except IndexError:
                 matched_pcode = None
             if matched_pcode:
+                warning = f"Pcode unknown {pcode}->{matched_pcode}"
                 pcode = matched_pcode
             else:
                 self._error_handler.add_missing_value_message(
@@ -226,7 +227,7 @@ class Dtm:
                     f"admin {admin_level} pcode",
                     pcode,
                 )
-                warning = f"Unknown pcode {pcode}!"
+                warning = f"Pcode unknown {pcode}"
                 if parent_name:
                     parent_pcode, _ = self._admins[admin_level - 2].get_pcode(
                         iso, parent_name
@@ -235,6 +236,7 @@ class Dtm:
                     iso, admin_name, parent=parent_pcode
                 )
                 if matched_pcode:
+                    warning = f"Pcode unknown {pcode}->{matched_pcode}"
                     pcode = matched_pcode
                 if not matched_pcode:
                     self._error_handler.add_missing_value_message(
@@ -243,7 +245,7 @@ class Dtm:
                         f"admin {admin_level} pcode",
                         pcode,
                     )
-                    warning = f"Unknown pcode {pcode}!"
+                    warning = f"Pcode unknown {pcode}"
                     return admin_info, warning
 
         admin_info[f"admin{admin_level}_code"] = pcode
