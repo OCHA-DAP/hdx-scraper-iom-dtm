@@ -13,7 +13,7 @@ from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
 from hdx.location.adminlevel import AdminLevel
 from hdx.location.country import Country
-from hdx.utilities.dateparse import parse_date
+from hdx.utilities.dateparse import iso_string_from_datetime, parse_date
 from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
@@ -337,8 +337,8 @@ class Dtm:
 
             # Parse date
             date = parse_date(row["reportingDate"])
-            row["reference_period_start"] = date
-            row["reference_period_end"] = date
+            row["reference_period_start"] = iso_string_from_datetime(date)
+            row["reference_period_end"] = iso_string_from_datetime(date)
 
             # Check p-code
             admin_level = row["admin_level"]
