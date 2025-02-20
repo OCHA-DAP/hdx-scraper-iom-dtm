@@ -210,6 +210,13 @@ class Dtm:
         global_data["dataset_hdx_id"] = dataset_id
         global_data["resource_hdx_id"] = resource_id
 
+        # Set missing admin 2 names
+        global_data.loc[
+            (global_data["admin_level"] == 2)
+            & (global_data["provider_admin2_name"].isna()),
+            "provider_admin2_name",
+        ] = " "
+
         # Check for duplicates in the data
         subset = global_data[
             [
@@ -222,11 +229,11 @@ class Dtm:
                 "reportingDate",
             ]
         ]
-        subset.loc[global_data["admin_level"] == 1, "admin2Pcode"] = global_data.loc[
-            global_data["admin_level"] == 1, "admin1Pcode"
+        subset.loc[subset["admin2Pcode"].isna(), "admin2Pcode"] = global_data.loc[
+            subset["admin2Pcode"].isna(), "admin1Pcode"
         ]
-        subset.loc[global_data["admin_level"] == 0, "admin2Pcode"] = global_data.loc[
-            global_data["admin_level"] == 0, "location_code"
+        subset.loc[subset["admin2Pcode"].isna(), "admin2Pcode"] = global_data.loc[
+            subset["admin2Pcode"].isna(), "location_code"
         ]
         duplicates = subset.duplicated(keep=False)
         global_data["error"] = None
