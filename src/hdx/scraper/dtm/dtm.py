@@ -3,7 +3,7 @@
 
 import logging
 from collections import defaultdict
-from typing import Dict, List, Optional, Tuple
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -13,6 +13,7 @@ from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
 from hdx.location.adminlevel import AdminLevel
 from hdx.location.country import Country
+from hdx.scraper.framework.utilities.hapi_admins import complete_admins
 from hdx.utilities.dateparse import iso_string_from_datetime, parse_date
 from hdx.utilities.retriever import Retrieve
 
@@ -182,82 +183,6 @@ class Dtm:
             admin.load_pcode_formats()
             self._admins.append(admin)
 
-    def get_admin_info(
-        self,
-        dataset_name: str,
-        iso: str,
-        admin_level: int,
-        pcode: str,
-        admin_name: str,
-        parent_pcode: Optional[str] = None,
-        parent_name: Optional[str] = None,
-    ) -> Tuple[Dict[str, str], Optional[str]]:
-        admin_info = {
-            "admin2_code": None,
-            "admin2_name": None,
-            "admin1_code": None,
-            "admin1_name": None,
-        }
-        warning = None
-
-        if not pcode:
-            self._error_handler.add_missing_value_message(
-                "DTM",
-                dataset_name,
-                f"admin {admin_level} pcode",
-                pcode,
-            )
-            warning = "Missing pcode"
-            return admin_info, warning
-
-        if pcode not in self._admins[admin_level - 1].pcodes:
-            try:
-                matched_pcode = self._admins[admin_level - 1].convert_admin_pcode_length(
-                    iso, pcode, parent=parent_pcode
-                )
-            except IndexError:
-                matched_pcode = None
-            if matched_pcode:
-                warning = f"Pcode unknown {pcode}->{matched_pcode}"
-                pcode = matched_pcode
-            else:
-                self._error_handler.add_missing_value_message(
-                    "DTM",
-                    dataset_name,
-                    f"admin {admin_level} pcode",
-                    pcode,
-                )
-                warning = f"Pcode unknown {pcode}"
-                if parent_name:
-                    parent_pcode, _ = self._admins[admin_level - 2].get_pcode(
-                        iso, parent_name
-                    )
-                matched_pcode, _ = self._admins[admin_level - 1].get_pcode(
-                    iso, admin_name, parent=parent_pcode
-                )
-                if matched_pcode:
-                    warning = f"Pcode unknown {pcode}->{matched_pcode}"
-                    pcode = matched_pcode
-                if not matched_pcode:
-                    self._error_handler.add_missing_value_message(
-                        "DTM",
-                        dataset_name,
-                        f"admin {admin_level} pcode",
-                        pcode,
-                    )
-                    warning = f"Pcode unknown {pcode}"
-                    return admin_info, warning
-
-        admin_info[f"admin{admin_level}_code"] = pcode
-        admin_info[f"admin{admin_level}_name"] = self._admins[
-            admin_level - 1
-        ].pcode_to_name.get(pcode)
-        if admin_level == 2:
-            admin1_code = self._admins[1].pcode_to_parent.get(pcode)
-            admin_info["admin1_code"] = admin1_code
-            admin_info["admin1_name"] = self._admins[0].pcode_to_name.get(admin1_code)
-        return admin_info, warning
-
     def generate_hapi_dataset(self, non_hapi_dataset_name: str) -> Dataset:
         # Set up admin levels and p-codes
         self.get_pcodes()
@@ -314,16 +239,6 @@ class Dtm:
             )
 
         # Loop through rows to check pcodes, get HRP/GHO status and dates
-        global_data["has_hrp"] = None
-        global_data["in_gho"] = None
-        global_data["reference_period_start"] = None
-        global_data["reference_period_end"] = None
-        global_data["admin1_code"] = None
-        global_data["admin2_code"] = None
-        global_data["admin1_name"] = None
-        global_data["admin2_name"] = None
-        global_data["warning"] = None
-
         global_data = global_data.to_dict("records")
         for row in global_data:
             # Get HRP and GHO status
@@ -344,27 +259,33 @@ class Dtm:
             admin_level = row["admin_level"]
             if admin_level == 0:
                 continue
-            pcode = row[f"admin{admin_level}Pcode"]
-            admin_name = row[f"provider_admin{admin_level}_name"]
-            parent_pcode = None
-            parent_name = None
-            if admin_level == 2:
-                parent_pcode = row[f"admin{admin_level - 1}Pcode"]
-                parent_name = row[f"provider_admin{admin_level - 1}_name"]
-            admin_info, warning = self.get_admin_info(
-                non_hapi_dataset_name,
+
+            provider_adm_names = [
+                row["provider_admin1_name"],
+                row["provider_admin2_name"],
+            ]
+            adm_codes = [row["admin1Pcode"], row["admin2Pcode"]]
+            adm_names = ["", ""]
+            adm_level, warnings = complete_admins(
+                self._admins,
                 country_iso,
-                admin_level,
-                pcode,
-                admin_name,
-                parent_pcode,
-                parent_name,
+                provider_adm_names,
+                adm_codes,
+                adm_names,
             )
-            row["admin1_code"] = admin_info["admin1_code"]
-            row["admin1_name"] = admin_info["admin1_name"]
-            row["admin2_code"] = admin_info["admin2_code"]
-            row["admin2_name"] = admin_info["admin2_name"]
-            row["warning"] = warning
+            for warning in warnings:
+                self._error_handler.add_message(
+                    "DTM",
+                    non_hapi_dataset_name,
+                    warning,
+                    message_type="warning",
+                )
+
+            row["admin1_code"] = adm_codes[0]
+            row["admin2_code"] = adm_codes[1]
+            row["admin1_name"] = adm_names[0]
+            row["admin2_name"] = adm_names[1]
+            row["warning"] = "|".join(warnings)
 
         # Generate dataset
         dataset = Dataset(

@@ -18,7 +18,7 @@ from hdx.utilities.path import (
 )
 from hdx.utilities.retriever import Retrieve
 
-from .dtm import Dtm
+from hdx.scraper.dtm.dtm import Dtm
 
 logger = logging.getLogger(__name__)
 

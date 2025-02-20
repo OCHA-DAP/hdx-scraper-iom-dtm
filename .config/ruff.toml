@@ -13,8 +13,9 @@ select = [
 known-local-folder = ["hdx.scraper.dtm"]
 known-third-party = [
   "hdx.api",
-  "hdx.utilities",
   "hdx.facades",
   "hdx.data",
-  'hdx.location',
+  "hdx.location",
+  "hdx.scraper",
+  "hdx.utilities",
 ]
