@@ -145,14 +145,23 @@ def expected_hapi_dataset():
         "maintainer": "80d68c27-4b7f-4865-87c6-050ebb6912ae",
         "owner_org": "hdx-hapi",
         "data_update_frequency": 7,
-        "notes": "This dataset contains data obtained from the [HDX "
-        "Humanitarian API](https://hapi.humdata.org/) (HDX HAPI), which "
-        "provides standardized humanitarian indicators designed for "
-        "seamless interoperability from multiple sources. The data "
-        "facilitates automated workflows and visualizations to support "
-        "humanitarian decision making. For more information, please see the "
-        "HDX HAPI [landing page](https://data.humdata.org/hapi) and "
-        "[documentation](https://hdx-hapi.readthedocs.io/en/latest/).\n",
+        "notes": "This dataset contains data obtained from the\n"
+        "[HDX Humanitarian API](https://hapi.humdata.org/) (HDX HAPI),\n"
+        "which provides standardized humanitarian indicators designed\n"
+        "for seamless interoperability from multiple sources.\n"
+        "The data facilitates automated workflows and visualizations\n"
+        "to support humanitarian decision making.\n"
+        "For more information, please see the HDX HAPI\n"
+        "[landing page](https://data.humdata.org/hapi)\n"
+        "and\n"
+        "[documentation](https://hdx-hapi.readthedocs.io/en/latest/).\n"
+        "\n"
+        "Warnings typically indicate corrections have been made to\n"
+        "the data or show things to look out for. Rows with only warnings\n"
+        "are considered complete, and are made available via the API.\n"
+        "Errors usually mean that the data is incomplete or unusable.\n"
+        "Rows with any errors are not present in the API but are included\n"
+        "here for transparency.\n",
     }
 
 
