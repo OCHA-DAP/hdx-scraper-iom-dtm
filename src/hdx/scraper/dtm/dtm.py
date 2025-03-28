@@ -189,7 +189,9 @@ class Dtm:
 
         non_hapi_dataset = Dataset.read_from_hdx(non_hapi_dataset_name)
         dataset_id = non_hapi_dataset["id"]
-        resource_id = non_hapi_dataset.get_resource(0)["id"]
+        resource = non_hapi_dataset.get_resource(0)
+        resource_id = resource["id"]
+        resource_name = resource["name"]
 
         global_data = pd.DataFrame(self.global_data)
         global_data.replace(np.nan, None, inplace=True)
@@ -239,11 +241,16 @@ class Dtm:
         global_data["error"] = None
         global_data.loc[duplicates, "error"] = "Duplicate row"
         if sum(duplicates) > 0:
-            self._error_handler.add_message(
-                "DTM",
-                non_hapi_dataset_name,
-                f"{sum(duplicates)} duplicates found",
-            )
+            iso_duplicates = global_data.loc[duplicates, "location_code"]
+            iso_duplicates = set(list(iso_duplicates))
+            for iso in iso_duplicates:
+                self._error_handler.add_message(
+                    "DTM",
+                    non_hapi_dataset_name,
+                    f"Duplicates found in {iso}",
+                    resource_name=resource_name,
+                    err_to_hdx=True,
+                )
 
         # Loop through rows to check pcodes, get HRP/GHO status and dates
         global_data = global_data.to_dict("records")
