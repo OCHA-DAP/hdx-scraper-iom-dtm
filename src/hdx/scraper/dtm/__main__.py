@@ -5,7 +5,6 @@ script then creates in HDX.
 
 """
 
-import argparse
 import logging
 from os import getenv
 from os.path import dirname, expanduser, join
@@ -27,18 +26,6 @@ logger = logging.getLogger(__name__)
 _USER_AGENT_LOOKUP = "hdx-scraper-dtm"
 _SAVED_DATA_DIR = "saved_data"  # Keep in repo to avoid deletion in /tmp
 _UPDATED_BY_SCRIPT = "HDX Scraper: dtm"
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="DTM")
-    parser.add_argument(
-        "-ehx",
-        "--err-to-hdx",
-        default=False,
-        action="store_true",
-        help="Write relevant found errors to HDX metadata",
-    )
-    return parser.parse_args()
 
 
 def main(
@@ -123,10 +110,6 @@ def main(
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    ehx = args.err_to_hdx
-    if ehx is None:
-        ehx = getenv("ERR_TO_HDX")
     facade(
         main,
         user_agent_config_yaml=join(expanduser("~"), ".useragents.yaml"),
@@ -134,5 +117,5 @@ if __name__ == "__main__":
         project_config_yaml=join(
             dirname(__file__), "config", "project_configuration.yaml"
         ),
-        err_to_hdx=ehx,
+        err_to_hdx=getenv("ERR_TO_HDX"),
     )
