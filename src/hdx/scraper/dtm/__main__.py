@@ -11,7 +11,7 @@ from os.path import dirname, expanduser, join
 
 from hdx.api.configuration import Configuration
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
-from hdx.facades.infer_arguments import facade
+from hdx.facades.keyword_arguments import facade
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import (
     script_dir_plus_file,
@@ -32,6 +32,7 @@ def main(
     save: bool = True,
     use_saved: bool = False,
     err_to_hdx: bool = False,
+    **ignore,
 ) -> None:
     """Generate datasets and create them in HDX
 
