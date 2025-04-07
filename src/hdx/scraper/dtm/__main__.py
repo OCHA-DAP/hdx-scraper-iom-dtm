@@ -8,10 +8,11 @@ script then creates in HDX.
 import logging
 from os import getenv
 from os.path import dirname, expanduser, join
+from typing import Optional
 
 from hdx.api.configuration import Configuration
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
-from hdx.facades.keyword_arguments import facade
+from hdx.facades.infer_arguments import facade
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import (
     script_dir_plus_file,
@@ -31,19 +32,21 @@ _UPDATED_BY_SCRIPT = "HDX Scraper: dtm"
 def main(
     save: bool = True,
     use_saved: bool = False,
-    err_to_hdx: bool = False,
-    **ignore,
+    err_to_hdx: Optional[bool] = None,
 ) -> None:
     """Generate datasets and create them in HDX
 
     Args:
         save (bool): Save downloaded data. Defaults to True.
         use_saved (bool): Use saved data. Defaults to False.
-        err_to_hdx (bool): Whether to write any errors to HDX metadata. Defaults to False.
+        err_to_hdx (Optional[bool]): Whether to write any errors to HDX metadata.
+        Defaults to None.
 
     Returns:
         None
     """
+    if err_to_hdx is None:
+        err_to_hdx = getenv("ERR_TO_HDX")
     with HDXErrorHandler(write_to_hdx=err_to_hdx) as error_handler:
         with wheretostart_tempdir_batch(folder=_USER_AGENT_LOOKUP) as info:
             temp_dir = info["folder"]
@@ -118,5 +121,4 @@ if __name__ == "__main__":
         project_config_yaml=join(
             dirname(__file__), "config", "project_configuration.yaml"
         ),
-        err_to_hdx=getenv("ERR_TO_HDX"),
     )
