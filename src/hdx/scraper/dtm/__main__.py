@@ -77,7 +77,9 @@ def main(
                         countries=countries, operation_status=operation_status
                     )
                     dataset.update_from_yaml(
-                        path=join(dirname(__file__), "config", "hdx_dataset_static.yaml")
+                        path=join(
+                            dirname(__file__), "config", "hdx_dataset_static.yaml"
+                        )
                     )
                     if len(countries) > 1:
                         dataset.generate_quickcharts(

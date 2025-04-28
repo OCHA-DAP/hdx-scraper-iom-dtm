@@ -79,13 +79,13 @@ class Dtm:
                     row["operationStatus"] = operation_status[iso3][row["operation"]]
                 except KeyError:
                     logger.warning(
-                        f"Operation status {iso3}:" f"{row['operation_status']} missing"
+                        f"Operation status {iso3}:{row['operation_status']} missing"
                     )
                 row["adminLevel"] = admin_level
             # Data is empty if country is not present
             if not data:
                 logger.warning(
-                    f"Country {iso3} has no data " f"for admin level {admin_level}"
+                    f"Country {iso3} has no data for admin level {admin_level}"
                 )
                 continue
             result += data
@@ -126,6 +126,7 @@ class Dtm:
                 "name": f"{title} IOM DTM data for admin levels 0-2",
                 "description": f"{title} IOM displacement tracking matrix data at admin "
                 f"levels 0, 1, and 2, sourced from the DTM API",
+                "p_coded": True,
             },
             datecol="reportingDate",
         )
