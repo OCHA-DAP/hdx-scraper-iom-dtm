@@ -79,13 +79,13 @@ class Dtm:
                     row["operationStatus"] = operation_status[iso3][row["operation"]]
                 except KeyError:
                     logger.warning(
-                        f"Operation status {iso3}:" f"{row['operation_status']} missing"
+                        f"Operation status {iso3}:{row['operation_status']} missing"
                     )
                 row["adminLevel"] = admin_level
             # Data is empty if country is not present
             if not data:
                 logger.warning(
-                    f"Country {iso3} has no data " f"for admin level {admin_level}"
+                    f"Country {iso3} has no data for admin level {admin_level}"
                 )
                 continue
             result += data

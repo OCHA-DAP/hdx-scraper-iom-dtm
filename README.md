@@ -1,7 +1,7 @@
 # Collector for dtm Datasets
-
 [![Build Status](https://github.com/OCHA-DAP/hdx-scraper-dtm/actions/workflows/run-python-tests.yaml/badge.svg)](https://github.com/OCHA-DAP/hdx-scraper-dtm/actions/workflows/run-python-tests.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdx-scraper-dtm/badge.svg?branch=main&ts=1)](https://coveralls.io/github/OCHA-DAP/hdx-scraper-dtm?branch=main)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 This script ...
 
@@ -10,17 +10,21 @@ This script ...
 ### Environment
 
 Development is currently done using Python 3.12. We recommend using a virtual
-environment such as `venv`:
+environment such as ``venv``:
 
-    python3.12 -m venv venv
+```shell
+    python -m venv venv
     source venv/bin/activate
+```
 
-In your virtual environment, please install all packages for
-development by running:
+In your virtual environment, install all packages for development by running:
 
+```shell
     pip install -r requirements.txt
+```
 
 ### Installing and running
+
 
 For the script to run, you will need to have a file called
 .hdx_configuration.yaml in your home directory containing your HDX key, e.g.:
@@ -29,74 +33,88 @@ For the script to run, you will need to have a file called
     hdx_read_only: false
     hdx_site: prod
 
-You will also need to supply the universal .useragents.yaml file in your home
-directory as specified in the parameter _user_agent_config_yaml_ passed to
-facade in run.py. The collector reads the key **hdx-scraper-who** as specified
-in the parameter _user_agent_lookup_.
+ You will also need to supply the universal .useragents.yaml file in your home
+ directory as specified in the parameter *user_agent_config_yaml* passed to
+ facade in run.py. The collector reads the key
+ **hdx-scraper-dtm** as specified in the parameter
+ *user_agent_lookup*.
 
-Alternatively, you can set up environment variables: `USER_AGENT`, `HDX_KEY`,
+ Alternatively, you can set up environment variables: `USER_AGENT`, `HDX_KEY`,
 `HDX_SITE`, `EXTRA_PARAMS`, `TEMP_DIR`, and `LOG_FILE_ONLY`.
 
 To install and run, execute:
 
+```shell
     pip install .
     python -m hdx.scraper.dtm
-
-## Environment
-
-Development is currently done using Python 3.12. We recommend using a virtual
-environment such as `venv`:
-
-    python3.12 -m venv venv
-    source venv/bin/activate
+```
 
 ### Pre-commit
 
-Be sure to install `pre-commit`, which is run every time
-you make a git commit:
+Be sure to install `pre-commit`, which is run every time you make a git commit:
 
 ```shell
-pip install pre-commit
-pre-commit install
+    pip install pre-commit
+    pre-commit install
 ```
 
-The configuration file for this project is in a
-non-start location. Thus, you will need to edit your
-`.git/hooks/pre-commit` file to reflect this. Change
-the first line that begins with `ARGS` to:
-
-    ARGS=(hook-impl --config=.config/pre-commit-config.yaml --hook-type=pre-commit)
-
 With pre-commit, all code is formatted according to
-[black]("https://github.com/psf/black") and
-[ruff]("https://github.com/charliermarsh/ruff") guidelines.
+[ruff](https://docs.astral.sh/ruff/) guidelines.
 
 To check if your changes pass pre-commit without committing, run:
 
-    pre-commit run --all-files --config=.config/pre-commit-config.yaml
+```shell
+    pre-commit run --all-files
+```
 
 ### Testing
 
 Ensure you have the required packages to run the tests:
 
+```shell
     pip install -r requirements-test.txt
+```
 
 To run the tests and view coverage, execute:
 
-`pytest -c .config/pytest.ini --cov hdx --cov-config .config/coveragerc`
+```shell
+    pytest -c --cov hdx
+```
 
-### Packages
+## Packages
 
-[pip-tools](https://github.com/jazzband/pip-tools) is used for
-package management. If you’ve introduced a new package to the
-source code please add it to the `dependencies` section of
-`pyproject.toml` with any known version constraints.
+[uv](https://github.com/astral-sh/uv) is used for package management.  If
+you’ve introduced a new package to the source code (i.e. anywhere in `src/`),
+please add it to the `project.dependencies` section of `pyproject.toml` with
+any known version constraints.
 
-For adding packages for testing, add them to
-the `test` sections under `[project.optional-dependencies]`.
+To add packages required only for testing, add them to the `test` section under
+`[project.optional-dependencies]`.
 
 Any changes to the dependencies will be automatically reflected in
-`requirements.txt` and `requirements-test.txt` with `pre-commit`,
-but you can re-generate the file without committing by executing:
+`requirements.txt` and `requirements-test.txt` with `pre-commit`, but you can
+re-generate the files without committing by executing:
 
-    pre-commit run pip-compile --all-files --config=.config/pre-commit-config.yaml
+```shell
+    pre-commit run pip-compile --all-files
+```
+
+## Project
+
+[Hatch](https://hatch.pypa.io/) is used for project management. The project can be built using:
+
+```shell
+    hatch build
+```
+
+Linting and syntax checking can be run with:
+
+```shell
+    hatch fmt --check
+```
+
+Tests can be executed using:
+
+```shell
+    hatch test
+```

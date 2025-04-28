@@ -1,14 +1,11 @@
 from os.path import join
 
 import pytest
-from hdx.api.configuration import Configuration
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
-from hdx.data.dataset import Dataset
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
 from hdx.utilities.retriever import Retrieve
-from hdx.utilities.useragent import UserAgent
 
 from hdx.scraper.dtm.dtm import Dtm
 
@@ -31,7 +28,7 @@ def expected_dataset():
         "data_update_frequency": 7,
         "dataset_date": "[2010-11-30T00:00:00 TO 2024-06-30T23:59:59]",
         "dataset_preview": "resource_id",
-        "dataset_source": "International Organization " "for Migration (IOM)",
+        "dataset_source": "International Organization for Migration (IOM)",
         "groups": [{"name": "hti"}, {"name": "afg"}, {"name": "tcd"}],
         "license_id": "hdx-other",
         "license_other": "Copyright © International Organization for "
@@ -205,42 +202,6 @@ def expected_hapi_resources():
 
 
 class TestDtm:
-    @pytest.fixture(scope="function")
-    def configuration(self, config_dir):
-        UserAgent.set_global("test")
-        Configuration._create(
-            hdx_read_only=True,
-            hdx_site="prod",
-            project_config_yaml=join(config_dir, "project_configuration.yaml"),
-        )
-        return Configuration.read()
-
-    @pytest.fixture(scope="function")
-    def read_dataset(self, monkeypatch):
-        def read_from_hdx(dataset_name):
-            return Dataset.load_from_json(
-                join(
-                    "tests",
-                    "fixtures",
-                    "input",
-                    f"dataset-{dataset_name}.json",
-                )
-            )
-
-        monkeypatch.setattr(Dataset, "read_from_hdx", staticmethod(read_from_hdx))
-
-    @pytest.fixture(scope="class")
-    def fixtures_dir(self):
-        return join("tests", "fixtures")
-
-    @pytest.fixture(scope="class")
-    def input_dir(self, fixtures_dir):
-        return join(fixtures_dir, "input")
-
-    @pytest.fixture(scope="class")
-    def config_dir(self, fixtures_dir):
-        return join("src", "hdx", "scraper", "dtm", "config")
-
     def test_dtm(
         self,
         configuration,
