@@ -126,6 +126,7 @@ class Dtm:
                 "name": f"{title} IOM DTM data for admin levels 0-2",
                 "description": f"{title} IOM displacement tracking matrix data at admin "
                 f"levels 0, 1, and 2, sourced from the DTM API",
+                "p_coded": True,
             },
             datecol="reportingDate",
         )

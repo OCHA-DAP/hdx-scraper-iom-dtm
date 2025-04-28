@@ -171,6 +171,7 @@ def expected_resources():
             "0, 1, and 2, sourced from the DTM API",
             "format": "csv",
             "name": "Global IOM DTM data for admin levels 0-2",
+            "p_coded": True,
             "resource_type": "file.upload",
             "url_type": "upload",
         },
@@ -194,6 +195,7 @@ def expected_hapi_resources():
             "documentation](https://hdx-hapi.readthedocs.io/en/latest/data_"
             "usage_guides/affected_people/#internally-displaced-persons) for "
             "more information",
+            "p_coded": True,
             "format": "csv",
             "resource_type": "file.upload",
             "url_type": "upload",

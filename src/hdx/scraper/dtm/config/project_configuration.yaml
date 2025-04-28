@@ -49,6 +49,7 @@ hxl_tags:
 hapi_resource_data:
   name: "Global Affected People: Internally-Displaced Persons"
   description: "IDPs data from HDX HAPI, please see [the documentation](https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/affected_people/#internally-displaced-persons) for more information"
+  p_coded: True
 
 hapi_hxl_tags:
   location_code: "#country+code"
