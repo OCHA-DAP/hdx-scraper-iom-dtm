@@ -44,7 +44,7 @@ google-auth-oauthlib==1.2.2
     # via gspread
 gspread==6.2.0
     # via hdx-python-scraper
-hdx-python-api==6.3.8
+hdx-python-api==6.4.5
     # via
     #   hdx-scraper-dtm (pyproject.toml)
     #   hdx-python-scraper
