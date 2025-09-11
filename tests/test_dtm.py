@@ -172,16 +172,12 @@ def expected_resources():
             "format": "csv",
             "name": "Global IOM DTM data for admin levels 0-2",
             "p_coded": True,
-            "resource_type": "file.upload",
-            "url_type": "upload",
         },
         {
             "dataset_preview_enabled": "True",
             "description": "Filtered and aggregated data used to create QuickCharts",
             "format": "csv",
             "name": "Data for QuickCharts",
-            "resource_type": "file.upload",
-            "url_type": "upload",
         },
     ]
 
@@ -197,8 +193,6 @@ def expected_hapi_resources():
             "more information",
             "p_coded": True,
             "format": "csv",
-            "resource_type": "file.upload",
-            "url_type": "upload",
         }
     ]
 
