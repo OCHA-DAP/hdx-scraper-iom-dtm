@@ -81,8 +81,9 @@ def main(
                         countries=countries, operation_status=operation_status
                     )
                     dataset.update_from_yaml(
-                        path=join(
-                            dirname(__file__), "config", "hdx_dataset_static.yaml"
+                        path=script_dir_plus_file(
+                                join("config", "hdx_dataset_static.yaml"),
+                                main,
                         )
                     )
                     if len(countries) > 1:
@@ -124,7 +125,7 @@ if __name__ == "__main__":
         main,
         user_agent_config_yaml=join(expanduser("~"), ".useragents.yaml"),
         user_agent_lookup=_USER_AGENT_LOOKUP,
-        project_config_yaml=join(
-            dirname(__file__), "config", "project_configuration.yaml"
+        project_config_yaml=script_dir_plus_file(
+            join("config", "project_configuration.yaml"), main
         ),
     )
