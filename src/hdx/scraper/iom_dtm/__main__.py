@@ -7,7 +7,7 @@ script then creates in HDX.
 
 import logging
 from os import getenv
-from os.path import dirname, expanduser, join
+from os.path import expanduser, join
 from typing import Optional
 
 from hdx.api.configuration import Configuration
@@ -82,8 +82,8 @@ def main(
                     )
                     dataset.update_from_yaml(
                         path=script_dir_plus_file(
-                                join("config", "hdx_dataset_static.yaml"),
-                                main,
+                            join("config", "hdx_dataset_static.yaml"),
+                            main,
                         )
                     )
                     if len(countries) > 1:
@@ -104,11 +104,10 @@ def main(
                     if len(countries) > 1:
                         hapi_dataset = dtm.generate_hapi_dataset(dataset["name"])
                         hapi_dataset.update_from_yaml(
-                            path=join(
-                                dirname(__file__),
-                                "config",
-                                "hdx_hapi_dataset_static.yaml",
-                            )
+                            path=script_dir_plus_file(
+                                join("config", "hdx_hapi_dataset_static.yaml"),
+                                main,
+                            ),
                         )
                         hapi_dataset.create_in_hdx(
                             remove_additional_resources=True,
