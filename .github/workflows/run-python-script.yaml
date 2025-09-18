@@ -28,8 +28,8 @@ jobs:
         HDX_KEY: ${{ secrets.HDX_BOT_SCRAPERS_API_TOKEN }}
         PREPREFIX: ${{ vars.HDX_USER_AGENT_PREPREFIX }}
         USER_AGENT: ${{ vars.USER_AGENT }}
-        EXTRA_PARAMS: ${{ vars.EXTRA_PARAMS }}
         ERR_TO_HDX: ${{ vars.ERR_TO_HDX }}
+        DTM_API_KEY: ${{ secrets.DTM_API_KEY }}
       run: |
         python -m hdx.scraper.iom_dtm
     - name: Send mail
