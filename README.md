@@ -36,7 +36,7 @@ For the script to run, you will need to have a file called
  You will also need to supply the universal .useragents.yaml file in your home
  directory as specified in the parameter *user_agent_config_yaml* passed to
  facade in run.py. The collector reads the key
- **hdx-scraper-dtm** as specified in the parameter
+ **hdx-scraper-iom-dtm** as specified in the parameter
  *user_agent_lookup*.
 
  Alternatively, you can set up environment variables: `USER_AGENT`, `HDX_KEY`,
@@ -46,7 +46,7 @@ To install and run, execute:
 
 ```shell
     pip install .
-    python -m hdx.scraper.dtm
+    python -m hdx.scraper.iom_dtm
 ```
 
 ### Pre-commit
