@@ -13,13 +13,14 @@ from typing import Optional
 from hdx.api.configuration import Configuration
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
 from hdx.facades.infer_arguments import facade
-from hdx.scraper.iom_dtm.pipeline import Pipeline
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import (
     script_dir_plus_file,
     wheretostart_tempdir_batch,
 )
 from hdx.utilities.retriever import Retrieve
+
+from hdx.scraper.iom_dtm.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 

@@ -2,11 +2,12 @@ from os.path import join
 
 import pytest
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
-from hdx.scraper.iom_dtm.pipeline import Pipeline
 from hdx.utilities.compare import assert_files_same
 from hdx.utilities.downloader import Download
 from hdx.utilities.path import temp_dir
 from hdx.utilities.retriever import Retrieve
+
+from hdx.scraper.iom_dtm.pipeline import Pipeline
 
 
 @pytest.fixture(scope="module")
