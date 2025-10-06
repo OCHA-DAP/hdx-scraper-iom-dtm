@@ -1,0 +1,79 @@
+# Collector specific configuration
+IDPS_URL: "https://dtmapi.iom.int/v3/displacement/admin{admin_level}?Admin0Pcode={iso3}"
+
+COUNTRIES_URL: "https://dtmapi.iom.int/v3/displacement/country-list"
+
+OPERATION_STATUS_URL: "https://dtmapi.iom.int/v3/displacement/operation-list"
+
+tags:
+  - conflict-violence
+  - displacement
+  - forced displacement
+  - hxl
+  - internally displaced persons-idp
+
+qc_resource_filename: data_for_quickcharts.csv
+
+qc_resource_data:
+  name: Data for QuickCharts
+  description: Filtered and aggregated data used to create QuickCharts
+
+qc_countries:
+  - AFG
+  - HTI
+  - TCD
+
+admin_levels:
+  - 0
+  - 1
+  - 2
+
+hxl_tags:
+  id: "#id+code"
+  operation: "#operation+name"
+  admin0Name: "#country+name"
+  admin0Pcode: "#country+code"
+  admin1Name: "#adm1+name"
+  admin1Pcode: "#adm1+code"
+  admin2Name: "#adm2+name"
+  admin2Pcode: "#adm2+code"
+  adminLevel: "#adm+level"
+  numPresentIdpInd: "#affected+idps"
+  reportingDate: "#date+reported"
+  yearReportingDate: "#date+year+reported"
+  monthReportingDate: "#date+month+reported"
+  roundNumber: "#round+code"
+  displacementReason: "#cause+type"
+  numberMales: "#affected+idps+m"
+  numberFemales: "#affected+idps+f"
+  idpOriginAdmin1Name: "#adm1+name+origin"
+  idpOriginAdmin1Pcode: "#adm1+code+origin"
+  assessmentType: "#assessment+type"
+  operationStatus: "#operation+status"
+
+hapi_resource_data:
+  name: "Global Affected People: Internally-Displaced Persons"
+  description: "IDPs data from HDX HAPI, please see [the documentation](https://hdx-hapi.readthedocs.io/en/latest/data_usage_guides/affected_people/#internally-displaced-persons) for more information"
+  p_coded: True
+
+hapi_hxl_tags:
+  location_code: "#country+code"
+  has_hrp: "#meta+has_hrp"
+  in_gho: "#meta+in_gho"
+  provider_admin1_name: "#adm1+name+provider"
+  provider_admin2_name: "#adm2+name+provider"
+  admin1_code: "#adm1+code"
+  admin1_name: "#adm1+name"
+  admin2_code: "#adm2+code"
+  admin2_name: "#adm2+name"
+  admin_level: "#adm+level"
+  operation: "#operation+name"
+  assessment_type: "#assessment+type"
+  population: "#affected+idps"
+  reporting_round: "#round+code"
+  reference_period_start: "#date+start"
+  reference_period_end: "#date+end"
+  dataset_hdx_id: "#meta+dataset_id"
+  resource_hdx_id: "#meta+resource_id"
+  warning: "#meta+warning"
+  error: "#meta+error"

@@ -9,14 +9,14 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
-name = "hdx-scraper-dtm"
+name = "hdx-scraper-iom-dtm"
 requires-python = ">=3.12"
 dependencies = [
-    "hdx-python-api",
-    "hdx-python-country",
-    "hdx-python-scraper",
-    "hdx-python-utilities",
-    "pandas",
+  "hdx-python-api>= 6.5.1",
+  "hdx-python-country>= 3.9.8",
+  "hdx-python-scraper>= 2.6.5",
+  "hdx-python-utilities>= 3.9.3",
+  "pandas",
 ]
 
 dynamic = ["version"]
@@ -29,4 +29,4 @@ test = [
 dev = ["pre-commit"]
 
 [project.scripts]
-run = "hdx.scraper.dtm.__main__:main"
+run = "hdx.scraper.iom_dtm.__main__:main"

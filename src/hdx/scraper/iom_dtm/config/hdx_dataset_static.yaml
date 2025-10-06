@@ -1,0 +1,46 @@
+subnational: True
+license_id: hdx-other
+license_other: >
+  Copyright © International Organization for Migration 2018 IOM reserves the
+  right to assert ownership of the Materials collected on the
+  https://data.humdata.org/ website. The Materials may be viewed,
+  downloaded, and printed for non-commercial use only, without, inter alia,
+  any right to sell, resell, redistribute or create derivative works therefrom.
+  At all times the User shall credit the DTM as the source, unless otherwise
+  stated. The user must include the URL of the Materials from the HDX Website,
+  as well as the following credit line: Source: “International Organization for
+  Migration (IOM), Displacement Tracking Matrix (DTM)”.
+methodology: Other
+methodology_other: |
+  [DTM Methodological Framework](https://dtm.iom.int/about/methodological-framework)
+
+  Note that the assessment_type field accepts three values:
+
+    - BA: Baseline Assessment
+    - ETT: Emergency Tracking Tool, Event Tracking Tool, or Emergency Event Tracking
+    - SA: Site Assessment, Multi-Sectoral Location Assessment, or Needs Monitoring Assessment
+caveats: >
+  This dataset comes from the
+  [DTM API](https://dtm.iom.int/data-and-analysis/dtm-api),
+  which provides only non-sensitive IDP
+  figures, aggregated at the country, Admin 1, and Admin 2 levels. For more
+  detailed information, please see the
+  [country-specific DTM datasets on HDX](https://data.humdata.org/dataset/?dataseries_name=IOM%20-%20DTM%20Baseline%20Assessment&dataseries_name=IOM%20-%20DTM%20Event%20and%20Flow%20Tracking&dataseries_name=IOM%20-%20DTM%20Site%20and%20Location%20Assessment&organization=international-organization-for-migration&q=&sort=last_modified%20desc&ext_page_size=25).
+  IOM is continually adding new data as well as updating data that's already been added.
+dataset_source: International Organization for Migration (IOM)
+package_creator: HDX Data Systems Team
+private: False
+maintainer: 80d68c27-4b7f-4865-87c6-050ebb6912ae
+owner_org: f53d32cd-132c-4ef4-bc6d-058f94d08adf
+data_update_frequency: 7
+notes: >
+  This dataset comes from the International Organization for Migration (IOM)'s
+  displacement tracking matrix (DTM)
+  [publicly accessible API](https://dtm.iom.int/data-and-analysis/dtm-api).
+  This API allows the humanitarian community, academia, media, government,
+  and non-governmental organizations to utilize the data collected by DTM.
+  The DTM API only provides non-sensitive IDP figures, aggregated at the
+  country, Admin 1 (states, provinces, or equivalent), and Admin 2
+  (smaller subnational administrative areas) levels. For more detailed
+  information, please see the
+  [country-specific DTM datasets on HDX](https://data.humdata.org/dataset/?dataseries_name=IOM%20-%20DTM%20Baseline%20Assessment&dataseries_name=IOM%20-%20DTM%20Event%20and%20Flow%20Tracking&dataseries_name=IOM%20-%20DTM%20Site%20and%20Location%20Assessment&organization=international-organization-for-migration&q=&sort=last_modified%20desc&ext_page_size=25).

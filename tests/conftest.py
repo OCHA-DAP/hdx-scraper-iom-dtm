@@ -21,7 +21,7 @@ def input_dir(fixtures_dir):
 
 @pytest.fixture(scope="session")
 def config_dir(fixtures_dir):
-    return join("src", "hdx", "scraper", "dtm", "config")
+    return join("src", "hdx", "scraper", "iom_dtm", "config")
 
 
 @pytest.fixture(scope="function")

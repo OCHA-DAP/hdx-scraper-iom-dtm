@@ -1,6 +1,6 @@
-# Collector for dtm Datasets
-[![Build Status](https://github.com/OCHA-DAP/hdx-scraper-dtm/actions/workflows/run-python-tests.yaml/badge.svg)](https://github.com/OCHA-DAP/hdx-scraper-dtm/actions/workflows/run-python-tests.yaml)
-[![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdx-scraper-dtm/badge.svg?branch=main&ts=1)](https://coveralls.io/github/OCHA-DAP/hdx-scraper-dtm?branch=main)
+# Collector for IOM DTM Datasets
+[![Build Status](https://github.com/OCHA-DAP/hdx-scraper-iom-dtm/actions/workflows/run-python-tests.yaml/badge.svg)](https://github.com/OCHA-DAP/hdx-scraper-iom-dtm/actions/workflows/run-python-tests.yaml)
+[![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdx-scraper-iom-dtm/badge.svg?branch=main&ts=1)](https://coveralls.io/github/OCHA-DAP/hdx-scraper-iom-dtm?branch=main)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 This script ...
@@ -36,7 +36,7 @@ For the script to run, you will need to have a file called
  You will also need to supply the universal .useragents.yaml file in your home
  directory as specified in the parameter *user_agent_config_yaml* passed to
  facade in run.py. The collector reads the key
- **hdx-scraper-dtm** as specified in the parameter
+ **hdx-scraper-iom-dtm** as specified in the parameter
  *user_agent_lookup*.
 
  Alternatively, you can set up environment variables: `USER_AGENT`, `HDX_KEY`,
@@ -46,7 +46,7 @@ To install and run, execute:
 
 ```shell
     pip install .
-    python -m hdx.scraper.dtm
+    python -m hdx.scraper.iom_dtm
 ```
 
 ### Pre-commit
