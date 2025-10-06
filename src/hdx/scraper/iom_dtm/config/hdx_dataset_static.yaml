@@ -11,8 +11,14 @@ license_other: >
   as well as the following credit line: Source: “International Organization for
   Migration (IOM), Displacement Tracking Matrix (DTM)”.
 methodology: Other
-methodology_other: >
+methodology_other: |
   [DTM Methodological Framework](https://dtm.iom.int/about/methodological-framework)
+
+  Note that the assessment_type field accepts three values:
+
+    - BA: Baseline Assessment
+    - ETT: Emergency Tracking Tool, Event Tracking Tool, or Emergency Event Tracking
+    - SA: Site Assessment, Multi-Sectoral Location Assessment, or Needs Monitoring Assessment
 caveats: >
   This dataset comes from the
   [DTM API](https://dtm.iom.int/data-and-analysis/dtm-api),

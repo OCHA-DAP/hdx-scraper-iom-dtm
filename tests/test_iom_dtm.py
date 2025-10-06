@@ -46,8 +46,14 @@ def expected_dataset():
         "Displacement Tracking Matrix (DTM)”.\n",
         "maintainer": "80d68c27-4b7f-4865-87c6-050ebb6912ae",
         "methodology": "Other",
-        "methodology_other": "[DTM Methodological "
-        "Framework](https://dtm.iom.int/about/methodological-framework)\n",
+        "methodology_other": "[DTM Methodological Framework]"
+        "(https://dtm.iom.int/about/methodological-framework)\n\n"
+        "Note that the assessment_type field accepts three values:\n\n"
+        "  - BA: Baseline Assessment\n"
+        "  - ETT: Emergency Tracking Tool, Event Tracking Tool, "
+        "or Emergency Event Tracking\n"
+        "  - SA: Site Assessment, Multi-Sectoral Location "
+        "Assessment, or Needs Monitoring Assessment\n",
         "name": "global-iom-dtm-from-api",
         "notes": "This dataset comes from the International Organization for "
         "Migration (IOM)'s displacement tracking matrix (DTM) [publicly "
