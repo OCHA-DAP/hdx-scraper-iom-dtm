@@ -14,7 +14,12 @@ from hdx.data.hdxobject import HDXError
 from hdx.location.adminlevel import AdminLevel
 from hdx.location.country import Country
 from hdx.scraper.framework.utilities.hapi_admins import complete_admins
-from hdx.utilities.dateparse import iso_string_from_datetime, parse_date
+from hdx.utilities.dateparse import (
+    default_date,
+    default_enddate,
+    iso_string_from_datetime,
+    parse_date,
+)
 from hdx.utilities.retriever import Retrieve
 
 logger = logging.getLogger(__name__)
@@ -258,6 +263,7 @@ class Pipeline:
                     "displacementReason": "first",
                     "idpOriginAdmin1Name": "first",
                     "idpOriginAdmin1Pcode": "first",
+                    "error": "first",
                 }
             )
             .reset_index()
@@ -284,64 +290,91 @@ class Pipeline:
             },
             inplace=True,
         )
-        # Add dataset metadata
-        result["dataset_hdx_id"] = dataset_id
-        result["resource_hdx_id"] = resource_id
-
         # Set missing admin 2 names
         result.loc[
             (result["admin_level"] == 2) & (result["provider_admin2_name"].isna()),
             "provider_admin2_name",
         ] = " "
 
+        min_date = default_enddate
+        max_date = default_date
         # Loop through rows to check pcodes, get HRP/GHO status and dates
         result = result.to_dict("records")
-        for row in result:
-            # Get HRP and GHO status
-            country_iso = row["location_code"]
-            hrp = Country.get_hrp_status_from_iso3(country_iso)
-            gho = Country.get_gho_status_from_iso3(country_iso)
-            hrp = "Y" if hrp else "N"
-            gho = "Y" if gho else "N"
-            row["has_hrp"] = hrp
-            row["in_gho"] = gho
 
-            # Parse date
-            date = parse_date(row["reportingDate"])
-            row["reference_period_start"] = iso_string_from_datetime(date)
-            row["reference_period_end"] = iso_string_from_datetime(date)
+        def get_rows():
+            nonlocal min_date, max_date
 
-            # Check p-code
-            admin_level = row["admin_level"]
-            if admin_level == 0:
-                continue
+            for row in result:
+                # Get HRP and GHO status
+                country_iso = row["location_code"]
+                newrow = {"location_code": country_iso}
+                hrp = Country.get_hrp_status_from_iso3(country_iso)
+                gho = Country.get_gho_status_from_iso3(country_iso)
+                hrp = "Y" if hrp else "N"
+                gho = "Y" if gho else "N"
+                newrow["has_hrp"] = hrp
+                newrow["in_gho"] = gho
+                newrow["provider_admin1_name"] = row["provider_admin1_name"]
+                newrow["provider_admin2_name"] = row["provider_admin2_name"]
 
-            provider_adm_names = [
-                row["provider_admin1_name"],
-                row["provider_admin2_name"],
-            ]
-            adm_codes = [row["admin1Pcode"], row["admin2Pcode"]]
-            adm_names = ["", ""]
-            adm_level, warnings = complete_admins(
-                self._admins,
-                country_iso,
-                provider_adm_names,
-                adm_codes,
-                adm_names,
-            )
-            for warning in warnings:
-                self._error_handler.add_message(
-                    "DTM",
-                    non_hapi_dataset_name,
-                    warning,
-                    message_type="warning",
-                )
+                # Check p-code
+                admin_level = row["admin_level"]
+                if admin_level == 0:
+                    newrow["admin1_code"] = ""
+                    newrow["admin1_name"] = ""
+                    newrow["admin2_code"] = ""
+                    newrow["admin2_name"] = ""
+                    adm_level = admin_level
+                    warnings = ""
+                else:
+                    provider_adm_names = [
+                        row["provider_admin1_name"],
+                        row["provider_admin2_name"],
+                    ]
+                    adm_codes = [row["admin1Pcode"], row["admin2Pcode"]]
+                    adm_names = ["", ""]
+                    adm_level, warnings = complete_admins(
+                        self._admins,
+                        country_iso,
+                        provider_adm_names,
+                        adm_codes,
+                        adm_names,
+                    )
+                    for warning in warnings:
+                        self._error_handler.add_message(
+                            "DTM",
+                            non_hapi_dataset_name,
+                            warning,
+                            message_type="warning",
+                        )
 
-            row["admin1_code"] = adm_codes[0]
-            row["admin2_code"] = adm_codes[1]
-            row["admin1_name"] = adm_names[0]
-            row["admin2_name"] = adm_names[1]
-            row["warning"] = "|".join(warnings)
+                    newrow["admin1_code"] = adm_codes[0]
+                    newrow["admin1_name"] = adm_names[0]
+                    newrow["admin2_code"] = adm_codes[1]
+                    newrow["admin2_name"] = adm_names[1]
+                newrow["admin_level"] = adm_level
+
+                newrow["operation"] = row["operation"]
+                newrow["assessment_type"] = row["assessment_type"]
+                newrow["population"] = row["population"]
+                newrow["reporting_round"] = row["reporting_round"]
+
+                # Parse date
+                date = parse_date(row["reportingDate"])
+                newrow["reference_period_start"] = iso_string_from_datetime(date)
+                newrow["reference_period_end"] = iso_string_from_datetime(date)
+                if date < min_date:
+                    min_date = date
+                if date > max_date:
+                    max_date = date
+
+                # Add dataset metadata
+                newrow["dataset_hdx_id"] = dataset_id
+                newrow["resource_hdx_id"] = resource_id
+
+                newrow["warning"] = "|".join(warnings)
+                newrow["error"] = row["error"]
+                yield newrow
 
         # Generate dataset
         dataset = Dataset(
@@ -352,16 +385,14 @@ class Pipeline:
         )
         dataset.add_other_location("world")
         dataset.add_tags(self._configuration["tags"])
-        hxl_tags = self._configuration["hapi_hxl_tags"]
-        dataset.generate_resource_from_iterable(
-            headers=list(hxl_tags.keys()),
-            iterable=result,
-            hxltags=hxl_tags,
+        headers = self._configuration["hapi_headers"]
+        dataset.generate_resource(
             folder=self._temp_dir,
             filename="hdx_hapi_idps_global.csv",
+            rows=get_rows(),
             resourcedata=self._configuration["hapi_resource_data"],
-            datecol="reportingDate",
+            headers=headers,
             encoding="utf-8-sig",
         )
-
+        dataset.set_time_period(min_date, max_date)
         return dataset

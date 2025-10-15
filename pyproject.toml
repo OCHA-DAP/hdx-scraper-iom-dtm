@@ -12,10 +12,10 @@ build-backend = "hatchling.build"
 name = "hdx-scraper-iom-dtm"
 requires-python = ">=3.12"
 dependencies = [
-  "hdx-python-api>= 6.5.1",
-  "hdx-python-country>= 3.9.8",
   "hdx-python-scraper>= 2.6.5",
-  "hdx-python-utilities>= 3.9.3",
+  "hdx-python-api>= 6.5.2",
+  "hdx-python-country>= 3.9.8",
+  "hdx-python-utilities>= 3.9.5",
   "pandas",
 ]
 
@@ -24,7 +24,8 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
   "pytest",
-  "pytest-cov"
+  "pytest-cov",
+  "cydifflib"
 ]
 dev = ["pre-commit"]
 
