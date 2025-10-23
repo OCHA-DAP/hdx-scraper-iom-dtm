@@ -44,7 +44,7 @@ def expected_dataset():
         "Website, as well as the following credit line: Source: "
         "“International Organization for Migration (IOM), "
         "Displacement Tracking Matrix (DTM)”.\n",
-        "maintainer": "80d68c27-4b7f-4865-87c6-050ebb6912ae",
+        "maintainer": "196196be-6037-4488-8b71-d786adf4c081",
         "methodology": "Other",
         "methodology_other": "[DTM Methodological Framework]"
         "(https://dtm.iom.int/about/methodological-framework)\n\n"
