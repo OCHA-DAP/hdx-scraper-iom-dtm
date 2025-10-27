@@ -3,7 +3,7 @@
 
 import logging
 from collections import defaultdict
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -61,7 +61,8 @@ class Pipeline:
 
     def get_country_data(
         self, iso3: str, dataset: Dataset, operation_status: defaultdict
-    ):
+    ) -> Tuple[List, int]:
+        highest_admin_level = 0
         result = []
         for admin_level in self._configuration["admin_levels"]:
             url = self._configuration["IDPS_URL"].format(
@@ -93,8 +94,9 @@ class Pipeline:
                     f"Country {iso3} has no data for admin level {admin_level}"
                 )
                 continue
+            highest_admin_level = admin_level
             result += data
-        return result
+        return result, highest_admin_level
 
     def generate_dataset(
         self, countries: List[str], operation_status: defaultdict
@@ -114,8 +116,11 @@ class Pipeline:
         dataset.add_tags(self._configuration["tags"])
         # Generate a single resource for all admin levels
         countries_data = []
+        highest_admin_level = 0
         for iso3 in countries:
-            data = self.get_country_data(iso3, dataset, operation_status)
+            data, admin_level = self.get_country_data(iso3, dataset, operation_status)
+            if admin_level > highest_admin_level:
+                highest_admin_level = admin_level
             countries_data += data
 
         if len(countries) > 1:
@@ -126,11 +131,11 @@ class Pipeline:
             iterable=countries_data,
             hxltags=self._configuration["hxl_tags"],
             folder=self._temp_dir,
-            filename=f"{name}-iom-dtm-from-api-admin-0-to-2.csv",
+            filename=f"{name}-iom-dtm-from-api-admin-0-to-{highest_admin_level}.csv",
             resourcedata={
-                "name": f"{title} IOM DTM data for admin levels 0-2",
+                "name": f"{title} IOM DTM data for admin levels 0-{highest_admin_level}",
                 "description": f"{title} IOM displacement tracking matrix data at admin "
-                f"levels 0, 1, and 2, sourced from the DTM API",
+                f"levels 0-{highest_admin_level}, sourced from the DTM API",
                 "p_coded": True,
             },
             datecol="reportingDate",

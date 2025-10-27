@@ -174,7 +174,7 @@ def expected_resources():
         {
             "dataset_preview_enabled": "False",
             "description": "Global IOM displacement tracking matrix data at admin levels "
-            "0, 1, and 2, sourced from the DTM API",
+            "0-2, sourced from the DTM API",
             "format": "csv",
             "name": "Global IOM DTM data for admin levels 0-2",
             "p_coded": True,
