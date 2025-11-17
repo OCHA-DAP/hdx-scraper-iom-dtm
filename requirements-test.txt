@@ -11,11 +11,11 @@ attrs==25.4.0
     #   jsonlines
     #   jsonschema
     #   referencing
-cachetools==6.2.1
+cachetools==6.2.2
     # via
     #   -c requirements.txt
     #   google-auth
-certifi==2025.10.5
+certifi==2025.11.12
     # via
     #   -c requirements.txt
     #   requests
@@ -27,15 +27,15 @@ charset-normalizer==3.4.4
     # via
     #   -c requirements.txt
     #   requests
-ckanapi==4.8
+ckanapi==4.9
     # via
     #   -c requirements.txt
     #   hdx-python-api
-click==8.3.0
+click==8.3.1
     # via
     #   -c requirements.txt
     #   typer
-coverage==7.11.0
+coverage==7.11.3
     # via pytest-cov
 cydifflib==1.2.0
     # via hdx-scraper-iom-dtm (pyproject.toml)
@@ -52,7 +52,7 @@ docopt==0.6.2
     #   -c requirements.txt
     #   ckanapi
     #   num2words
-docutils==0.22.2
+docutils==0.22.3
     # via
     #   -c requirements.txt
     #   defopt
@@ -68,7 +68,7 @@ frictionless==5.18.1
     # via
     #   -c requirements.txt
     #   hdx-python-utilities
-google-auth==2.41.1
+google-auth==2.43.0
     # via
     #   -c requirements.txt
     #   google-auth-oauthlib
@@ -81,7 +81,7 @@ gspread==6.2.1
     # via
     #   -c requirements.txt
     #   hdx-python-scraper
-hdx-python-api==6.5.2
+hdx-python-api==6.5.3
     # via
     #   -c requirements.txt
     #   hdx-scraper-iom-dtm (pyproject.toml)
@@ -184,7 +184,7 @@ num2words==0.5.14
     # via
     #   -c requirements.txt
     #   quantulum3
-numpy==2.3.4
+numpy==2.3.5
     # via
     #   -c requirements.txt
     #   pandas
@@ -228,11 +228,11 @@ pyasn1-modules==0.4.2
     # via
     #   -c requirements.txt
     #   google-auth
-pydantic==2.12.3
+pydantic==2.12.4
     # via
     #   -c requirements.txt
     #   frictionless
-pydantic-core==2.41.4
+pydantic-core==2.41.5
     # via
     #   -c requirements.txt
     #   pydantic
@@ -245,7 +245,7 @@ pyphonetics==0.5.3
     # via
     #   -c requirements.txt
     #   hdx-python-utilities
-pytest==8.4.2
+pytest==9.0.1
     # via
     #   hdx-scraper-iom-dtm (pyproject.toml)
     #   pytest-cov
@@ -289,7 +289,7 @@ referencing==0.37.0
     #   -c requirements.txt
     #   jsonschema
     #   jsonschema-specifications
-regex==2025.10.23
+regex==2025.11.3
     # via
     #   -c requirements.txt
     #   hdx-python-scraper
@@ -318,7 +318,7 @@ rich==14.2.0
     # via
     #   -c requirements.txt
     #   typer
-rpds-py==0.28.0
+rpds-py==0.29.0
     # via
     #   -c requirements.txt
     #   jsonschema
@@ -331,7 +331,7 @@ ruamel-yaml==0.18.16
     # via
     #   -c requirements.txt
     #   hdx-python-utilities
-ruamel-yaml-clib==0.2.14
+ruamel-yaml-clib==0.2.15
     # via
     #   -c requirements.txt
     #   ruamel-yaml
