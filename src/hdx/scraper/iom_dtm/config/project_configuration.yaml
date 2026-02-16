@@ -9,7 +9,6 @@ tags:
   - conflict-violence
   - displacement
   - forced displacement
-  - hxl
   - internally displaced persons-idp
 
 qc_resource_filename: data_for_quickcharts.csv
@@ -28,28 +27,28 @@ admin_levels:
   - 1
   - 2
 
-hxl_tags:
-  id: "#id+code"
-  operation: "#operation+name"
-  admin0Name: "#country+name"
-  admin0Pcode: "#country+code"
-  admin1Name: "#adm1+name"
-  admin1Pcode: "#adm1+code"
-  admin2Name: "#adm2+name"
-  admin2Pcode: "#adm2+code"
-  adminLevel: "#adm+level"
-  numPresentIdpInd: "#affected+idps"
-  reportingDate: "#date+reported"
-  yearReportingDate: "#date+year+reported"
-  monthReportingDate: "#date+month+reported"
-  roundNumber: "#round+code"
-  displacementReason: "#cause+type"
-  numberMales: "#affected+idps+m"
-  numberFemales: "#affected+idps+f"
-  idpOriginAdmin1Name: "#adm1+name+origin"
-  idpOriginAdmin1Pcode: "#adm1+code+origin"
-  assessmentType: "#assessment+type"
-  operationStatus: "#operation+status"
+headers:
+  - id
+  - operation
+  - admin0Name
+  - admin0Pcode
+  - admin1Name
+  - admin1Pcode
+  - admin2Name
+  - admin2Pcode
+  - adminLevel
+  - numPresentIdpInd
+  - reportingDate
+  - yearReportingDate
+  - monthReportingDate
+  - roundNumber
+  - displacementReason
+  - numberMales
+  - numberFemales
+  - idpOriginAdmin1Name
+  - idpOriginAdmin1Pcode
+  - assessmentType
+  - operationStatus
 
 hapi_resource_data:
   name: "Global Affected People: Internally-Displaced Persons"

@@ -126,71 +126,26 @@ class Pipeline:
         if len(countries) > 1:
             self._global_data = countries_data
 
-        dataset.generate_resource_from_iterable(
-            headers=list(self._configuration["hxl_tags"].keys()),
-            iterable=countries_data,
-            hxltags=self._configuration["hxl_tags"],
+        dataset.generate_resource(
             folder=self._temp_dir,
             filename=f"{name}-iom-dtm-from-api-admin-0-to-{highest_admin_level}.csv",
+            rows=countries_data,
             resourcedata={
                 "name": f"{title} IOM DTM data for admin levels 0-{highest_admin_level}",
                 "description": f"{title} IOM displacement tracking matrix data at admin "
                 f"levels 0-{highest_admin_level}, sourced from the DTM API",
                 "p_coded": True,
             },
+            headers=self._configuration["headers"],
             datecol="reportingDate",
         )
-
-        if len(countries) > 1:
-            # Filter data for quickcharts
-            df = (
-                pd.DataFrame(countries_data)
-                # Only take admin 0, and required countries
-                .loc[
-                    lambda x: x["admin1Pcode"].isna()
-                    & x["admin0Pcode"].isin(
-                        self._configuration["qc_countries"]
-                        if len(countries) > 1
-                        else countries
-                    )
-                ]
-                # Then drop the extra columns
-                .drop(
-                    columns=[
-                        "admin1Name",
-                        "admin1Pcode",
-                        "admin2Name",
-                        "admin2Pcode",
-                        "adminLevel",
-                    ],
-                    errors="ignore",
-                )
-                # Take the latest numbers per country, year, and operation
-                .loc[
-                    lambda x: x.groupby(
-                        ["admin0Pcode", "operation", "yearReportingDate"]
-                    )["reportingDate"].idxmax()
-                ]
-            )
-
-            # Generate quickchart resource
-            dataset.generate_resource_from_iterable(
-                headers=list(df.columns),
-                iterable=df.to_dict("records"),
-                hxltags=self._configuration["hxl_tags"],
-                folder=self._temp_dir,
-                filename=self._configuration["qc_resource_filename"],
-                # Resource name and description from the config
-                resourcedata=self._configuration["qc_resource_data"],
-            )
 
         return dataset
 
     def get_pcodes(self) -> None:
         for admin_level in [1, 2]:
             admin = AdminLevel(admin_level=admin_level, retriever=self._retriever)
-            dataset = admin.get_libhxl_dataset(retriever=self._retriever)
-            admin.setup_from_libhxl_dataset(dataset)
+            admin.setup_from_url()
             admin.load_pcode_formats()
             self._admins.append(admin)
 
@@ -273,7 +228,7 @@ class Pipeline:
             )
             .reset_index()
         )
-        result.replace("***NONE***", None, inplace=True)
+        result.replace("***NONE***", "", inplace=True)
         result.drop(
             columns=[
                 "displacementReason",
@@ -319,8 +274,10 @@ class Pipeline:
                 gho = "Y" if gho else "N"
                 newrow["has_hrp"] = hrp
                 newrow["in_gho"] = gho
-                newrow["provider_admin1_name"] = row["provider_admin1_name"]
-                newrow["provider_admin2_name"] = row["provider_admin2_name"]
+                provider_admin1_name = row["provider_admin1_name"]
+                provider_admin2_name = row["provider_admin2_name"]
+                newrow["provider_admin1_name"] = provider_admin1_name
+                newrow["provider_admin2_name"] = provider_admin2_name
 
                 # Check p-code
                 admin_level = row["admin_level"]
@@ -333,8 +290,8 @@ class Pipeline:
                     warnings = ""
                 else:
                     provider_adm_names = [
-                        row["provider_admin1_name"],
-                        row["provider_admin2_name"],
+                        provider_admin1_name,
+                        provider_admin2_name,
                     ]
                     adm_codes = [row["admin1Pcode"], row["admin2Pcode"]]
                     adm_names = ["", ""]

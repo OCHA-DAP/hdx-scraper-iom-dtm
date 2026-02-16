@@ -65,7 +65,6 @@ def configuration(config_dir):
                 "conflict-violence",
                 "displacement",
                 "forced displacement",
-                "hxl",
                 "internally displaced persons-idp",
             )
         ],

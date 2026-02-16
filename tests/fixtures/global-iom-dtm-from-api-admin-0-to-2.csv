@@ -1,5 +1,4 @@
 id,operation,admin0Name,admin0Pcode,admin1Name,admin1Pcode,admin2Name,admin2Pcode,adminLevel,numPresentIdpInd,reportingDate,yearReportingDate,monthReportingDate,roundNumber,displacementReason,numberMales,numberFemales,idpOriginAdmin1Name,idpOriginAdmin1Pcode,assessmentType,operationStatus
-#id+code,#operation+name,#country+name,#country+code,#adm1+name,#adm1+code,#adm2+name,#adm2+code,#adm+level,#affected+idps,#date+reported,#date+year+reported,#date+month+reported,#round+code,#cause+type,#affected+idps+m,#affected+idps+f,#adm1+name+origin,#adm1+code+origin,#assessment+type,#operation+status
 ,Returns and displacement in Afghanistan,Afghanistan,AFG,,,,,0,179956,2017-03-30T00:00:00,2017,3,1,Conflict,,,Not available,Not available,BA,Active
 ,Returns and displacement in Afghanistan,Afghanistan,AFG,,,,,0,98,2017-03-30T00:00:00,2017,3,1,Natural disaster,,,Not available,Not available,BA,Active
 ,Returns and displacement in Afghanistan,Afghanistan,AFG,,,,,0,66308,2017-03-30T00:00:00,2017,3,1,No reason for displacement reported,,,Not available,Not available,BA,Active
