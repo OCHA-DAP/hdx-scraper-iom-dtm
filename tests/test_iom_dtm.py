@@ -27,7 +27,6 @@ def expected_dataset():
         "that's already been added.\n",
         "data_update_frequency": 7,
         "dataset_date": "[2010-11-30T00:00:00 TO 2025-06-30T23:59:59]",
-        "dataset_preview": "resource_id",
         "dataset_source": "International Organization for Migration (IOM)",
         "groups": [{"name": "afg"}, {"name": "tcd"}, {"name": "hti"}],
         "license_id": "hdx-other",
@@ -84,10 +83,6 @@ def expected_dataset():
                 "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
             },
             {
-                "name": "hxl",
-                "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
-            },
-            {
                 "name": "internally displaced persons-idp",
                 "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
             },
@@ -113,10 +108,6 @@ def expected_hapi_dataset():
             },
             {
                 "name": "forced displacement",
-                "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
-            },
-            {
-                "name": "hxl",
                 "vocabulary_id": "b891512e-9516-4bf5-962a-7a289772a2a1",
             },
             {
@@ -172,18 +163,11 @@ def expected_hapi_dataset():
 def expected_resources():
     return [
         {
-            "dataset_preview_enabled": "False",
             "description": "Global IOM displacement tracking matrix data at admin levels "
             "0-2, sourced from the DTM API",
             "format": "csv",
             "name": "Global IOM DTM data for admin levels 0-2",
             "p_coded": True,
-        },
-        {
-            "dataset_preview_enabled": "True",
-            "description": "Filtered and aggregated data used to create QuickCharts",
-            "format": "csv",
-            "name": "Data for QuickCharts",
         },
     ]
 
@@ -250,17 +234,13 @@ class TestDtm:
                         path=join(config_dir, "hdx_resource_view_static.yaml"),
                     )
                     assert dataset == expected_dataset
-                    assert dataset.get_resources()[:2] == expected_resources
+                    assert dataset.get_resources() == expected_resources
 
-                    filename_list = [
-                        "global-iom-dtm-from-api-admin-0-to-2.csv",
-                        "data_for_quickcharts.csv",
-                    ]
-                    for filename in filename_list:
-                        assert_files_same(
-                            join("tests", "fixtures", filename),
-                            join(tempdir, filename),
-                        )
+                    filename = "global-iom-dtm-from-api-admin-0-to-2.csv"
+                    assert_files_same(
+                        join("tests", "fixtures", filename),
+                        join(tempdir, filename),
+                    )
 
                     hapi_dataset = dtm.generate_hapi_dataset("global-iom-dtm-from-api")
                     hapi_dataset.update_from_yaml(
