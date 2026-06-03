@@ -37,10 +37,10 @@ def main(
     """Generate datasets and create them in HDX
 
     Args:
-        dtm_api_key (Optional[str]): API key to access IOM DTM data
+        dtm_api_key (str | None): API key to access IOM DTM data
         save (bool): Save downloaded data. Defaults to False.
         use_saved (bool): Use saved data. Defaults to False.
-        err_to_hdx (Optional[bool]): Whether to write any errors to HDX metadata.
+        err_to_hdx (bool | None): Whether to write any errors to HDX metadata.
         Defaults to None.
 
     Returns:
