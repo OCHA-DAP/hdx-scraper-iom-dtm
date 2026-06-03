@@ -3,7 +3,6 @@
 
 import logging
 from collections import defaultdict
-from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -13,7 +12,7 @@ from hdx.data.dataset import Dataset
 from hdx.data.hdxobject import HDXError
 from hdx.location.adminlevel import AdminLevel
 from hdx.location.country import Country
-from hdx.scraper.framework.utilities.hapi_admins import complete_admins
+from hdx.pipelineutils.hapi_admins import complete_admins
 from hdx.utilities.dateparse import (
     default_date,
     default_enddate,
@@ -40,7 +39,7 @@ class Pipeline:
         self._error_handler = error_handler
         self._global_data = []
 
-    def get_countries(self) -> List[str]:
+    def get_countries(self) -> list[str]:
         """Get list of ISO3s to query the API with"""
         data = self._retriever.download_json(url=self._configuration["COUNTRIES_URL"])[
             "result"
@@ -61,7 +60,7 @@ class Pipeline:
 
     def get_country_data(
         self, iso3: str, dataset: Dataset, operation_status: defaultdict
-    ) -> Tuple[List, int]:
+    ) -> tuple[list, int]:
         highest_admin_level = 0
         result = []
         for admin_level in self._configuration["admin_levels"]:
@@ -99,7 +98,7 @@ class Pipeline:
         return result, highest_admin_level
 
     def generate_dataset(
-        self, countries: List[str], operation_status: defaultdict
+        self, countries: list[str], operation_status: defaultdict
     ) -> Dataset:
         name = "global" if len(countries) > 1 else countries[0].lower()
         title = (

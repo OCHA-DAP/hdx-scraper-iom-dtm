@@ -229,10 +229,6 @@ class TestDtm:
                     dataset.update_from_yaml(
                         path=join(config_dir, "hdx_dataset_static.yaml")
                     )
-                    dataset.generate_quickcharts(
-                        resource=1,
-                        path=join(config_dir, "hdx_resource_view_static.yaml"),
-                    )
                     assert dataset == expected_dataset
                     assert dataset.get_resources() == expected_resources
 

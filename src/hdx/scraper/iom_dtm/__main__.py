@@ -8,7 +8,6 @@ script then creates in HDX.
 import logging
 from os import getenv
 from os.path import expanduser, join
-from typing import Optional
 
 from hdx.api.configuration import Configuration
 from hdx.api.utilities.hdx_error_handler import HDXErrorHandler
@@ -30,10 +29,10 @@ _UPDATED_BY_SCRIPT = "HDX Scraper: IOM DTM"
 
 
 def main(
-    dtm_api_key: Optional[str] = None,
+    dtm_api_key: str | None = None,
     save: bool = False,
     use_saved: bool = False,
-    err_to_hdx: Optional[bool] = None,
+    err_to_hdx: bool | None = None,
 ) -> None:
     """Generate datasets and create them in HDX
 
