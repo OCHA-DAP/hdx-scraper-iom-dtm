@@ -15,7 +15,48 @@ processing. For each country, displacement data is downloaded per admin level,
 merged with operation status, and normalised into a standard column set; the
 per-country and global standard datasets are uploaded to HDX first; the HAPI
 dataset is then generated from the global data, adding admin P-codes and date
-fields from the most recent reporting round. It is run every Monday.
+fields from the most recent reporting round. It runs every Monday at around
+11 AM UTC and takes approximately 2 minutes to complete.
+
+## Data Pipeline
+
+### API reads (~150–250 calls per run)
+
+- **Country list** (1 read): fetches the list of countries with active DTM
+  operations.
+- **Operation status** (1 read): fetches the current operation status for all
+  countries.
+- **Admin-level displacement data** (up to 3 reads per country across admin levels
+  0–2): displacement figures downloaded per admin level for each country.
+
+### API writes (~55–85 calls per run)
+
+- **Per-country displacement datasets** (~one write per country): each dataset
+  contains displacement data across admin levels 0–2.
+- **Global displacement dataset** (1 write): aggregates data across all countries.
+- **HAPI dataset** (1 write): derived from the global data, enriched with admin
+  P-codes and date fields from the most recent reporting round.
+
+### Temporary files
+
+- Per-country CSV files of tens to hundreds of KB each, created during processing.
+
+### Uploaded files
+
+- Per-country displacement datasets with admin-level breakdown.
+- Global displacement dataset.
+- HAPI dataset derived from the global output.
+
+### Transformations
+
+1. **Admin-level download**: displacement data is fetched separately for admin
+   levels 0, 1, and 2 per country.
+2. **Operation status merge**: admin-level data is joined with the operation status
+   response.
+3. **Column normalisation**: source columns are renamed and aligned to a standard
+   output schema.
+4. **P-code and date enrichment**: the HAPI dataset adds admin P-codes and date
+   fields derived from the most recent reporting round per country.
 
 ## Development
 
