@@ -3,7 +3,19 @@
 [![Coverage Status](https://coveralls.io/repos/github/OCHA-DAP/hdx-scraper-iom-dtm/badge.svg?branch=main&ts=1)](https://coveralls.io/github/OCHA-DAP/hdx-scraper-iom-dtm?branch=main)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
-This pipeline retrieves displacement data from the IOM Displacement Tracking Matrix (DTM) API and publishes it to HDX.
+This pipeline retrieves internally displaced persons (IDP) data from the
+[IOM Displacement Tracking Matrix (DTM) API](https://dtmapi.iom.int/) and
+publishes it to HDX first as per-country and global displacement datasets,
+and then as a HAPI dataset derived from the global data. It makes approximately 150–250 reads to the DTM API (one call each
+for the country list and operation status, plus up to three admin-level calls
+per country across admin levels 0–2) and around 55–85 HDX writes (one per
+country dataset plus a global dataset and a HAPI dataset). Temporary
+per-country CSV files of tens to hundreds of KB each are created during
+processing. For each country, displacement data is downloaded per admin level,
+merged with operation status, and normalised into a standard column set; the
+per-country and global standard datasets are uploaded to HDX first; the HAPI
+dataset is then generated from the global data, adding admin P-codes and date
+fields from the most recent reporting round. It is run every Monday.
 
 ## Development
 
