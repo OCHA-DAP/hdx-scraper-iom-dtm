@@ -6,21 +6,20 @@
 This pipeline retrieves internally displaced persons (IDP) data from the
 [IOM Displacement Tracking Matrix (DTM) API](https://dtmapi.iom.int/) and
 publishes it to HDX first as per-country and global displacement datasets,
-and then as a HAPI dataset derived from the global data. It makes approximately 150–250 reads to the DTM API (one call each
+and then as a HAPI dataset derived from the global data. It makes reads to the DTM API (one call each
 for the country list and operation status, plus up to three admin-level calls
-per country across admin levels 0–2) and around 55–85 HDX writes (one per
+per country across admin levels 0–2) and HDX writes (one per
 country dataset plus a global dataset and a HAPI dataset). Temporary
 per-country CSV files of tens to hundreds of KB each are created during
 processing. For each country, displacement data is downloaded per admin level,
 merged with operation status, and normalised into a standard column set; the
 per-country and global standard datasets are uploaded to HDX first; the HAPI
 dataset is then generated from the global data, adding admin P-codes and date
-fields from the most recent reporting round. It runs every Monday at around
-11 AM UTC and takes approximately 2 minutes to complete.
+fields from the most recent reporting round.
 
 ## Data Pipeline
 
-### API reads (~150–250 calls per run)
+### API reads
 
 - **Country list** (1 read): fetches the list of countries with active DTM
   operations.
@@ -29,7 +28,7 @@ fields from the most recent reporting round. It runs every Monday at around
 - **Admin-level displacement data** (up to 3 reads per country across admin levels
   0–2): displacement figures downloaded per admin level for each country.
 
-### API writes (~55–85 calls per run)
+### API writes
 
 - **Per-country displacement datasets** (~one write per country): each dataset
   contains displacement data across admin levels 0–2.
