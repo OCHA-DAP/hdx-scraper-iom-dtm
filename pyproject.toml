@@ -19,6 +19,12 @@ dependencies = [
   "hdx-python-utilities>= 4.0.6",
   "pandas",
 ]
+readme = "README.md"
+
+[project.urls]
+Homepage = "https://github.com/OCHA-DAP/hdx-scraper-iom-dtm"
+Repository = "https://github.com/OCHA-DAP/hdx-scraper-iom-dtm"
+Issues = "https://github.com/OCHA-DAP/hdx-scraper-iom-dtm/issues"
 
 [dependency-groups]
 dev = [
